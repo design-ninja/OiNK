@@ -29,7 +29,7 @@ export function StatusBars({
 const styles = StyleSheet.create({
   statusBars: {
     position: "absolute",
-    top: 0,
+    top: 40,
     left: 24,
     right: 24,
     paddingTop: 16,

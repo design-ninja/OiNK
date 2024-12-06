@@ -9,39 +9,25 @@ interface PoopProps {
 }
 
 export function Poop({ x, y, id, onPress }: PoopProps) {
-  const scale = useRef(new Animated.Value(1)).current;
   const opacity = useRef(new Animated.Value(1)).current;
 
   const handlePress = useCallback(() => {
-    Animated.parallel([
-      Animated.timing(scale, {
-        toValue: 1.5,
-        duration: 200,
-        useNativeDriver: true,
-      }),
-      Animated.timing(opacity, {
-        toValue: 0,
-        duration: 200,
-        useNativeDriver: true,
-      }),
-    ]).start(() => {
+    Animated.timing(opacity, {
+      toValue: 0,
+      duration: 200,
+      useNativeDriver: true,
+    }).start(() => {
       onPress(id);
     });
   }, [id, onPress]);
 
   return (
-    <Pressable style={[styles.poop, { left: x, top: y }]} onPress={handlePress}>
-      <Animated.Text
-        style={[
-          styles.poopEmoji,
-          {
-            transform: [{ scale }],
-            opacity,
-          },
-        ]}
-      >
-        💩
-      </Animated.Text>
+    <Pressable
+      style={[styles.poop, { left: x, top: y }]}
+      onPress={handlePress}
+      hitSlop={10}
+    >
+      <Animated.Text style={[styles.poopEmoji, { opacity }]}>💩</Animated.Text>
     </Pressable>
   );
 }
@@ -49,12 +35,12 @@ export function Poop({ x, y, id, onPress }: PoopProps) {
 const styles = StyleSheet.create({
   poop: {
     position: "absolute",
-    width: 40,
-    height: 40,
+    width: 60,
+    height: 60,
     justifyContent: "center",
     alignItems: "center",
   },
   poopEmoji: {
-    fontSize: 53,
+    fontSize: 56,
   },
 });

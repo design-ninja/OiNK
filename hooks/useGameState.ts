@@ -43,8 +43,7 @@ interface GameState {
 }
 
 export function useGameState() {
-  const { playSound, playBackgroundMusic, stopBackgroundMusic } =
-    useGameSounds();
+  const { playSound } = useGameSounds();
   const [state, setState] = useState<GameState>({
     hunger: GAME_CONFIG.MAX_STAT_VALUE,
     happiness: GAME_CONFIG.MAX_STAT_VALUE,
@@ -71,13 +70,11 @@ export function useGameState() {
       isPaused: false,
       backgroundSound: null,
     });
-    playBackgroundMusic();
-  }, [playBackgroundMusic]);
+  }, []);
 
   const togglePause = useCallback(async () => {
     setState((prev) => {
       const newPaused = !prev.isPaused;
-      handleBackgroundMusic(newPaused);
       return { ...prev, isPaused: newPaused };
     });
   }, []);
@@ -199,16 +196,6 @@ export function useGameState() {
       isSick: false,
     }));
   }, [playSound]);
-
-  const handleBackgroundMusic = async (isPaused: boolean) => {
-    if (state.backgroundSound) {
-      if (isPaused) {
-        await state.backgroundSound.stopAsync();
-      } else {
-        await state.backgroundSound.playAsync();
-      }
-    }
-  };
 
   useEffect(() => {
     const gameInterval = setInterval(() => {

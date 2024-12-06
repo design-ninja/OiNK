@@ -1,7 +1,6 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { View, StyleSheet, Image, Dimensions } from "react-native";
 import { useGameState } from "@/hooks/useGameState";
-import { useGameSounds } from "@/hooks/useGameSounds";
 import { Poop } from "@/components/Poop";
 import { GameOverScreen } from "@/app/screens/GameOverScreen";
 import { YouWinScreen } from "@/app/screens/YouWinScreen";
@@ -22,11 +21,6 @@ const LAYOUT = {
 export default function HomeScreen() {
   const { state, actions } = useGameState();
   const [currentAction, setCurrentAction] = useState<string | null>(null);
-  const { playBackgroundMusic } = useGameSounds();
-
-  useEffect(() => {
-    playBackgroundMusic();
-  }, []);
 
   const handleAction = (action: () => void, emoji: string) => {
     if (!state.isPaused) {

@@ -126,6 +126,6 @@ const styles = StyleSheet.create({
     position: "absolute",
     bottom: 0,
     alignSelf: "center",
-    right: 31,
+    right: 28,
   },
 });
