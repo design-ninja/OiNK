@@ -76,6 +76,7 @@ const styles = StyleSheet.create({
     height: "100%",
   },
   statusValue: {
+    fontFamily: "PlusJakartaSans",
     fontSize: 16,
     fontWeight: "bold",
     color: "white",

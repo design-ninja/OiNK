@@ -39,7 +39,6 @@ export function Pig({
 
     playSound("play");
 
-    // Анимация увеличения и уменьшения при нажатии
     Animated.sequence([
       Animated.timing(scale, {
         toValue: 1.2,
@@ -127,6 +126,6 @@ const styles = StyleSheet.create({
     position: "absolute",
     bottom: 0,
     alignSelf: "center",
-    right: 28,
+    right: 31,
   },
 });

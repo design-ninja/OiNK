@@ -56,12 +56,14 @@ const styles = StyleSheet.create({
     position: "absolute",
   },
   gameOverTitle: {
+    fontFamily: "PlusJakartaSans",
     color: "white",
     fontSize: 48,
     fontWeight: "800",
     marginTop: 120,
   },
   gameOverMessage: {
+    fontFamily: "PlusJakartaSans",
     color: "white",
     fontSize: 24,
     fontWeight: "700",
@@ -77,6 +79,7 @@ const styles = StyleSheet.create({
     transform: [{ scale: 1 }],
   },
   resetButtonText: {
+    fontFamily: "PlusJakartaSans",
     color: "white",
     fontSize: 20,
     fontWeight: "700",

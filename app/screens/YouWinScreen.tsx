@@ -43,12 +43,14 @@ const styles = StyleSheet.create({
     position: "absolute",
   },
   gameOverTitle: {
+    fontFamily: "PlusJakartaSans",
     color: "white",
     fontSize: 48,
     fontWeight: "800",
     marginTop: 120,
   },
   resetButton: {
+    fontFamily: "PlusJakartaSans",
     backgroundColor: "#22c55e",
     paddingHorizontal: 32,
     paddingVertical: 16,
