@@ -1,5 +1,12 @@
 import { useEffect, useRef } from "react";
-import { Text, StyleSheet, Animated, Dimensions, Image } from "react-native";
+import {
+  Text,
+  StyleSheet,
+  Animated,
+  Dimensions,
+  Pressable,
+} from "react-native";
+import { useGameSounds } from "@/hooks/useGameSounds";
 
 const SCREEN_WIDTH = Dimensions.get("window").width;
 const SCREEN_HEIGHT = Dimensions.get("window").height;
@@ -24,6 +31,28 @@ export function Pig({
   const position = useRef(
     new Animated.ValueXY({ x: SCREEN_WIDTH / 2, y: SCREEN_HEIGHT / 2 })
   ).current;
+  const scale = useRef(new Animated.Value(1)).current;
+  const { playSound } = useGameSounds();
+
+  const handlePress = () => {
+    if (isPaused) return;
+
+    playSound("play");
+
+    // Анимация увеличения и уменьшения при нажатии
+    Animated.sequence([
+      Animated.timing(scale, {
+        toValue: 1.2,
+        duration: 100,
+        useNativeDriver: true,
+      }),
+      Animated.timing(scale, {
+        toValue: 1,
+        duration: 100,
+        useNativeDriver: true,
+      }),
+    ]).start();
+  };
 
   const movePig = () => {
     if (isPaused) return;
@@ -72,8 +101,13 @@ export function Pig({
 
   return (
     <Animated.View style={[styles.pig, position.getLayout()]}>
-      <Image source={getPigImage()} style={styles.pigImage} />
-      {isSick && <Text style={styles.sickEmoji}>🤮</Text>}
+      <Pressable onPress={handlePress}>
+        <Animated.Image
+          source={getPigImage()}
+          style={[styles.pigImage, { transform: [{ scale }] }]}
+        />
+        {isSick && <Text style={styles.sickEmoji}>🤮</Text>}
+      </Pressable>
     </Animated.View>
   );
 }
