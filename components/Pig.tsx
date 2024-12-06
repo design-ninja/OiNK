@@ -33,6 +33,34 @@ export function Pig({
   ).current;
   const scale = useRef(new Animated.Value(1)).current;
   const { playSound } = useGameSounds();
+  const previousAge = useRef(age);
+
+  useEffect(() => {
+    const milestones = [10, 25, 50, 80];
+    const hasReachedMilestone = milestones.some(
+      (milestone) => age >= milestone && previousAge.current < milestone
+    );
+
+    if (hasReachedMilestone) {
+      playSound("birthday");
+
+      // Добавим анимацию празднования
+      Animated.sequence([
+        Animated.timing(scale, {
+          toValue: 1.3,
+          duration: 200,
+          useNativeDriver: true,
+        }),
+        Animated.timing(scale, {
+          toValue: 1,
+          duration: 200,
+          useNativeDriver: true,
+        }),
+      ]).start();
+    }
+
+    previousAge.current = age;
+  }, [age, playSound]);
 
   const handlePress = () => {
     if (isPaused) return;

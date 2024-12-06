@@ -34,6 +34,7 @@ export function useGameSounds() {
           heal: require("@/assets/sounds/heal.mp3"),
           gameOver: require("@/assets/sounds/gameover.mp3"),
           win: require("@/assets/sounds/win.mp3"),
+          birthday: require("@/assets/sounds/happy-birthday.mp3"),
         };
 
         for (const [key, file] of Object.entries(soundFiles)) {
