@@ -1,5 +1,5 @@
-import { useEffect, useRef } from "react";
-import { Pressable, Text, StyleSheet, Animated } from "react-native";
+import { useRef } from "react";
+import { Pressable, StyleSheet, Animated } from "react-native";
 
 interface AnimatedPoopProps {
   x: number;

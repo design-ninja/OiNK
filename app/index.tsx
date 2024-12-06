@@ -12,6 +12,9 @@ import {
 import { useGameState } from "@/hooks/useGameState";
 import { useGameSounds } from "@/hooks/useGameSounds";
 import { AnimatedPoop } from "@/components/AnimatedPoop";
+import { GameOverScreen } from "@/app/screens/GameOverScreen";
+import { YouWinScreen } from "@/app/screens/YouWinScreen";
+import { StatusBar } from "@/components/StatusBar";
 
 const SCREEN_WIDTH = Dimensions.get("window").width;
 const SCREEN_HEIGHT = Dimensions.get("window").height;
@@ -21,125 +24,6 @@ const LAYOUT = {
   CONTROLS_HEIGHT: 120,
   PIG_SAFE_PADDING: 50,
 } as const;
-
-const DEATH_MESSAGES = {
-  hunger: { emoji: "🍽️", message: "🐷 died from hunger..." },
-  happiness: { emoji: "😢", message: "🐷 died from sadness..." },
-  cleanliness: { emoji: "🦠", message: "🐷 died from uncleanliness..." },
-} as const;
-
-interface GameOverScreenProps {
-  causeOfDeath?: string;
-  onReset: () => void;
-}
-
-function GameOverScreen({ causeOfDeath, onReset }: GameOverScreenProps) {
-  const scaleAnim = useRef(new RNAnimated.Value(0)).current;
-
-  useEffect(() => {
-    RNAnimated.spring(scaleAnim, {
-      toValue: 1,
-      useNativeDriver: true,
-    }).start();
-  }, []);
-
-  const deathInfo =
-    causeOfDeath && causeOfDeath in DEATH_MESSAGES
-      ? DEATH_MESSAGES[causeOfDeath as keyof typeof DEATH_MESSAGES]
-      : { emoji: "💀", message: "Game Over" };
-
-  return (
-    <View style={styles.overlay}>
-      <RNAnimated.Text
-        style={[styles.gameOverEmoji, { transform: [{ scale: scaleAnim }] }]}
-      >
-        {deathInfo.emoji}
-      </RNAnimated.Text>
-      <Text style={styles.gameOverTitle}>Game Over</Text>
-      <Text style={styles.gameOverMessage}>{deathInfo.message}</Text>
-      <Pressable style={styles.resetButton} onPress={onReset}>
-        <Text style={styles.resetButtonText}>Start Again</Text>
-      </Pressable>
-    </View>
-  );
-}
-
-function YouWinScreen({ onReset }: { onReset: () => void }) {
-  const scaleAnim = useRef(new RNAnimated.Value(0)).current;
-
-  useEffect(() => {
-    RNAnimated.spring(scaleAnim, {
-      toValue: 1,
-      useNativeDriver: true,
-    }).start();
-  }, []);
-
-  return (
-    <View style={styles.overlay}>
-      <RNAnimated.Text
-        style={[styles.gameOverEmoji, { transform: [{ scale: scaleAnim }] }]}
-      >
-        🎉
-      </RNAnimated.Text>
-      <Text style={styles.gameOverTitle}>You Win!</Text>
-      <Pressable style={styles.resetButton} onPress={onReset}>
-        <Text style={styles.resetButtonText}>Play Again</Text>
-      </Pressable>
-    </View>
-  );
-}
-
-const LABEL_EMOJIS = {
-  Hunger: "🍎",
-  Happiness: "😊",
-  Cleanliness: "🧽",
-  Age: "🎂",
-} as const;
-
-interface StatusBarProps {
-  label: keyof typeof LABEL_EMOJIS;
-  value: number;
-  color: string;
-}
-
-function StatusBar({ label, value, color }: StatusBarProps) {
-  const isAge = label === "Age";
-  const emoji = LABEL_EMOJIS[label];
-  const displayValue = isAge ? Math.floor(value) : Math.round(value);
-  const percentage = isAge ? (value / 100) * 100 : value;
-
-  const widthAnim = useRef(new RNAnimated.Value(percentage)).current;
-
-  useEffect(() => {
-    RNAnimated.timing(widthAnim, {
-      toValue: percentage,
-      duration: 1000,
-      useNativeDriver: false,
-      easing: Easing.linear,
-    }).start();
-  }, [percentage]);
-
-  return (
-    <View style={styles.statusBarContainer}>
-      <Text style={styles.statusEmoji}>{emoji}</Text>
-      <View style={styles.statusBarTrack}>
-        <RNAnimated.View
-          style={[
-            styles.statusBarFill,
-            {
-              backgroundColor: color,
-              width: widthAnim.interpolate({
-                inputRange: [0, 100],
-                outputRange: ["0%", "100%"],
-              }),
-            },
-          ]}
-        />
-      </View>
-      <Text style={styles.statusValue}>{displayValue}</Text>
-    </View>
-  );
-}
 
 interface ActionEffectProps {
   emoji: string;
