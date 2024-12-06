@@ -95,8 +95,9 @@ export function Pig({
     if (age >= 80) return require("../assets/images/piggy80.png");
     if (age >= 50) return require("../assets/images/piggy50.png");
     if (age >= 25) return require("../assets/images/piggy25.png");
+    if (age >= 10) return require("../assets/images/piggy10.png");
     console.log("Loading default piggy.png");
-    return require("../assets/images/piggy.png");
+    return require("../assets/images/piggy0.png");
   };
 
   return (
