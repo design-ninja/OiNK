@@ -15,7 +15,7 @@ const SCREEN_HEIGHT = Dimensions.get("window").height;
 
 const LAYOUT = {
   STATUS_BAR_HEIGHT: 200,
-  CONTROLS_HEIGHT: 120,
+  CONTROLS_HEIGHT: 100,
   PIG_SAFE_PADDING: 50,
 } as const;
 
