@@ -93,6 +93,7 @@ export default function HomeScreen() {
         statusBarHeight={LAYOUT.STATUS_BAR_HEIGHT}
         controlsHeight={LAYOUT.CONTROLS_HEIGHT}
         safePadding={LAYOUT.PIG_SAFE_PADDING}
+        age={state.age}
       />
 
       <ActionEffect

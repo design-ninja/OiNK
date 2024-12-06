@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { Dimensions } from "react-native";
 import { useGameSounds } from "./useGameSounds";
+import { Audio } from "expo-av";
 
 const SCREEN_WIDTH = Dimensions.get("window").width;
 const SCREEN_HEIGHT = Dimensions.get("window").height;
@@ -38,6 +39,7 @@ interface GameState {
   poops: Array<{ x: number; y: number; id: number }>;
   causeOfDeath?: string;
   isPaused: boolean;
+  backgroundSound: Audio.Sound | null;
 }
 
 export function useGameState() {
@@ -53,6 +55,7 @@ export function useGameState() {
     hasWon: false,
     poops: [],
     isPaused: false,
+    backgroundSound: null,
   });
 
   const reset = useCallback(() => {
@@ -66,21 +69,18 @@ export function useGameState() {
       hasWon: false,
       poops: [],
       isPaused: false,
+      backgroundSound: null,
     });
     playBackgroundMusic();
   }, [playBackgroundMusic]);
 
-  const togglePause = useCallback(() => {
+  const togglePause = useCallback(async () => {
     setState((prev) => {
-      const newIsPaused = !prev.isPaused;
-      if (newIsPaused) {
-        stopBackgroundMusic();
-      } else {
-        playBackgroundMusic();
-      }
-      return { ...prev, isPaused: newIsPaused };
+      const newPaused = !prev.isPaused;
+      handleBackgroundMusic(newPaused);
+      return { ...prev, isPaused: newPaused };
     });
-  }, [playBackgroundMusic, stopBackgroundMusic]);
+  }, []);
 
   const decreaseStats = useCallback(() => {
     if (state.isPaused) return;
@@ -200,6 +200,16 @@ export function useGameState() {
     }));
   }, [playSound]);
 
+  const handleBackgroundMusic = async (isPaused: boolean) => {
+    if (state.backgroundSound) {
+      if (isPaused) {
+        await state.backgroundSound.stopAsync();
+      } else {
+        await state.backgroundSound.playAsync();
+      }
+    }
+  };
+
   useEffect(() => {
     const gameInterval = setInterval(() => {
       if (!state.isGameOver && !state.hasWon && !state.isPaused) {
@@ -235,6 +245,35 @@ export function useGameState() {
       playSound("win");
     }
   }, [state.isGameOver, state.hasWon, playSound]);
+
+  useEffect(() => {
+    if (state.isPaused) return;
+
+    const interval = setInterval(() => {
+      setState((prev) => ({ ...prev, age: prev.age + 1 }));
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, [state.isPaused]);
+
+  useEffect(() => {
+    const loadSound = async () => {
+      const { sound } = await Audio.Sound.createAsync(
+        require("../assets/sounds/background.mp3"),
+        { isLooping: true }
+      );
+      setState((prev) => ({ ...prev, backgroundSound: sound }));
+      await sound.playAsync();
+    };
+
+    loadSound();
+
+    return () => {
+      if (state.backgroundSound) {
+        state.backgroundSound.unloadAsync();
+      }
+    };
+  }, []);
 
   return {
     state,

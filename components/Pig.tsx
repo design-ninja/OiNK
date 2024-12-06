@@ -1,5 +1,5 @@
 import { useEffect, useRef } from "react";
-import { Text, StyleSheet, Animated, Dimensions } from "react-native";
+import { Text, StyleSheet, Animated, Dimensions, Image } from "react-native";
 
 const SCREEN_WIDTH = Dimensions.get("window").width;
 const SCREEN_HEIGHT = Dimensions.get("window").height;
@@ -10,6 +10,7 @@ interface PigProps {
   statusBarHeight: number;
   controlsHeight: number;
   safePadding: number;
+  age: number;
 }
 
 export function Pig({
@@ -18,6 +19,7 @@ export function Pig({
   statusBarHeight,
   controlsHeight,
   safePadding,
+  age,
 }: PigProps) {
   const position = useRef(
     new Animated.ValueXY({ x: SCREEN_WIDTH / 2, y: SCREEN_HEIGHT / 2 })
@@ -55,12 +57,23 @@ export function Pig({
     return () => clearInterval(moveInterval);
   }, [isPaused]);
 
+  useEffect(() => {
+    console.log("Current pig age:", age);
+  }, [age]);
+
+  const getPigImage = () => {
+    console.log("Getting pig image for age:", age);
+    if (age >= 80) return require("../assets/images/piggy80.png");
+    if (age >= 50) return require("../assets/images/piggy50.png");
+    if (age >= 25) return require("../assets/images/piggy25.png");
+    console.log("Loading default piggy.png");
+    return require("../assets/images/piggy.png");
+  };
+
   return (
     <Animated.View style={[styles.pig, position.getLayout()]}>
-      <Text style={styles.emoji}>
-        🐷
-        {isSick && <Text style={styles.sickEmoji}>🤮</Text>}
-      </Text>
+      <Image source={getPigImage()} style={styles.pigImage} />
+      {isSick && <Text style={styles.sickEmoji}>🤮</Text>}
     </Animated.View>
   );
 }
@@ -69,14 +82,16 @@ const styles = StyleSheet.create({
   pig: {
     position: "absolute",
   },
-  emoji: {
-    fontSize: 80,
+  pigImage: {
+    width: 100,
+    height: 100,
+    resizeMode: "contain",
   },
   sickEmoji: {
-    fontSize: 32,
+    fontSize: 40,
     position: "absolute",
-    bottom: 11,
+    bottom: 0,
     alignSelf: "center",
-    right: 24,
+    right: 31,
   },
 });
