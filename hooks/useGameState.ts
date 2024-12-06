@@ -13,7 +13,7 @@ const LAYOUT = {
 } as const;
 
 const GAME_CONFIG = {
-  TICK_RATE: 1000,
+  TICK_RATE: 1800,
   POOP_CHANCE: 0.15,
   SICK_CHANCE: 0.08,
   MAX_STAT_VALUE: 100,
@@ -87,13 +87,17 @@ export function useGameState() {
         ? GAME_CONFIG.STAT_DECREASE.SICK
         : GAME_CONFIG.STAT_DECREASE.NORMAL;
 
+      const poopMultiplier = 1 + prev.poops.length * 0.5;
+
+      const ageMultiplier = 1 + prev.age / 20;
+
       const newHunger = Math.max(
         GAME_CONFIG.MIN_STAT_VALUE,
-        prev.hunger - decreaseRate * 2
+        prev.hunger - decreaseRate * 2 * poopMultiplier
       );
       const newHappiness = Math.max(
         GAME_CONFIG.MIN_STAT_VALUE,
-        prev.happiness - decreaseRate * 1.5
+        prev.happiness - decreaseRate * 1.5 * poopMultiplier * ageMultiplier
       );
       const newCleanliness = Math.max(
         GAME_CONFIG.MIN_STAT_VALUE,
@@ -164,17 +168,27 @@ export function useGameState() {
 
   const feed = useCallback(() => {
     playSound("feed");
-    setState((prev) => ({
-      ...prev,
-      hunger: Math.min(
-        GAME_CONFIG.MAX_STAT_VALUE,
-        prev.hunger +
-          (prev.isSick
-            ? GAME_CONFIG.STAT_INCREASE.SICK
-            : GAME_CONFIG.STAT_INCREASE.NORMAL)
-      ),
-    }));
-  }, [playSound]);
+    setState((prev) => {
+      const currentPoopChance = GAME_CONFIG.POOP_CHANCE * (prev.hunger / 20);
+
+      if (Math.random() < currentPoopChance) {
+        setTimeout(() => {
+          addPoop();
+        }, Math.random() * 2000 + 1000);
+      }
+
+      return {
+        ...prev,
+        hunger: Math.min(
+          GAME_CONFIG.MAX_STAT_VALUE,
+          prev.hunger +
+            (prev.isSick
+              ? GAME_CONFIG.STAT_INCREASE.SICK
+              : GAME_CONFIG.STAT_INCREASE.NORMAL)
+        ),
+      };
+    });
+  }, [playSound, addPoop]);
 
   const play = useCallback(() => {
     playSound("play");
@@ -211,11 +225,32 @@ export function useGameState() {
           return { ...prev, age: newAge };
         });
 
-        // Шанс заболеть
-        if (Math.random() < GAME_CONFIG.SICK_CHANCE) {
-          playSound("sick");
-          setState((prev) => ({ ...prev, isSick: true }));
-        }
+        // Модифицированный шанс заболеть
+        setState((prev) => {
+          // Базовый шанс заболевания
+          let sickChance = GAME_CONFIG.SICK_CHANCE;
+
+          // Увеличиваем шанс на 10% за каждую какашку
+          sickChance += prev.poops.length * 0.1;
+
+          // Увеличиваем шанс при низкой радости (ниже 50)
+          if (prev.happiness < 50) {
+            sickChance += (50 - prev.happiness) * 0.01; // +1% за каждую единицу ниже 50
+          }
+
+          // Увеличиваем шанс при низком голоде (ниже 30)
+          if (prev.hunger < 30) {
+            sickChance += (30 - prev.hunger) * 0.02; // +2% за каждую единицу ниже 30
+          }
+
+          // Проверяем, заболела ли свинка
+          if (!prev.isSick && Math.random() < sickChance) {
+            playSound("sick");
+            return { ...prev, isSick: true };
+          }
+
+          return prev;
+        });
 
         // Шанс покакать
         if (Math.random() < GAME_CONFIG.POOP_CHANCE) {

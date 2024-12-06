@@ -71,8 +71,8 @@ const styles = StyleSheet.create({
   },
   resetButton: {
     backgroundColor: "#22c55e",
-    paddingHorizontal: 32,
-    paddingVertical: 16,
+    paddingHorizontal: 48,
+    paddingVertical: 24,
     borderRadius: 9999,
     marginTop: "auto",
     marginBottom: 64,
@@ -82,6 +82,6 @@ const styles = StyleSheet.create({
     fontFamily: "PlusJakartaSans",
     color: "white",
     fontSize: 20,
-    fontWeight: "700",
+    fontWeight: "600",
   },
 });
