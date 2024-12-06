@@ -41,7 +41,8 @@ interface GameState {
 }
 
 export function useGameState() {
-  const { playSound } = useGameSounds();
+  const { playSound, playBackgroundMusic, stopBackgroundMusic } =
+    useGameSounds();
   const [state, setState] = useState<GameState>({
     hunger: GAME_CONFIG.MAX_STAT_VALUE,
     happiness: GAME_CONFIG.MAX_STAT_VALUE,
@@ -66,11 +67,20 @@ export function useGameState() {
       poops: [],
       isPaused: false,
     });
-  }, []);
+    playBackgroundMusic();
+  }, [playBackgroundMusic]);
 
   const togglePause = useCallback(() => {
-    setState((prev) => ({ ...prev, isPaused: !prev.isPaused }));
-  }, []);
+    setState((prev) => {
+      const newIsPaused = !prev.isPaused;
+      if (newIsPaused) {
+        stopBackgroundMusic();
+      } else {
+        playBackgroundMusic();
+      }
+      return { ...prev, isPaused: newIsPaused };
+    });
+  }, [playBackgroundMusic, stopBackgroundMusic]);
 
   const decreaseStats = useCallback(() => {
     if (state.isPaused) return;

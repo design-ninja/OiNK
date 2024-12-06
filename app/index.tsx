@@ -11,6 +11,7 @@ import {
 } from "react-native";
 import { useGameState } from "@/hooks/useGameState";
 import { useGameSounds } from "@/hooks/useGameSounds";
+import { AnimatedPoop } from "@/components/AnimatedPoop";
 
 const SCREEN_WIDTH = Dimensions.get("window").width;
 const SCREEN_HEIGHT = Dimensions.get("window").height;
@@ -301,13 +302,13 @@ export default function HomeScreen() {
       </View>
 
       {state.poops.map((poop) => (
-        <Pressable
+        <AnimatedPoop
           key={poop.id}
-          style={[styles.poop, { left: poop.x, top: poop.y }]}
-          onPress={() => actions.cleanPoop(poop.id)}
-        >
-          <Text style={styles.poopEmoji}>💩</Text>
-        </Pressable>
+          x={poop.x}
+          y={poop.y}
+          id={poop.id}
+          onPress={actions.cleanPoop}
+        />
       ))}
 
       <RNAnimated.View style={[styles.pig, pigPosition.getLayout()]}>

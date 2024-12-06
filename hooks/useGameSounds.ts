@@ -50,6 +50,21 @@ export function useGameSounds() {
     }
   }, []);
 
+  const stopBackgroundMusic = useCallback(async () => {
+    try {
+      const backgroundSound = sounds.current["background"];
+      if (!backgroundSound) return;
+
+      const status = await backgroundSound.getStatusAsync();
+      if (status.isLoaded && status.isPlaying) {
+        await backgroundSound.pauseAsync();
+        isBackgroundMusicPlaying.current = false;
+      }
+    } catch (error) {
+      console.warn("Failed to stop background music:", error);
+    }
+  }, []);
+
   useEffect(() => {
     const loadSounds = async () => {
       try {
@@ -96,5 +111,5 @@ export function useGameSounds() {
     };
   }, [playBackgroundMusic]);
 
-  return { playSound, playBackgroundMusic };
+  return { playSound, playBackgroundMusic, stopBackgroundMusic };
 }
