@@ -1,43 +1,90 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import {
   View,
   StyleSheet,
   Image,
   Dimensions,
-  TouchableOpacity,
-  Animated,
-  Text,
   Pressable,
+  Text,
+  Animated as RNAnimated,
 } from "react-native";
 import { useGameState } from "@/hooks/useGameState";
 
 const SCREEN_WIDTH = Dimensions.get("window").width;
 const SCREEN_HEIGHT = Dimensions.get("window").height;
 
-const GAME_CONFIG = {
-  TICK_RATE: 1000,
-  POOP_CHANCE: 0.15,
-  SICK_CHANCE: 0.08,
-  MAX_STAT_VALUE: 100,
-  MIN_STAT_VALUE: 0,
-  STAT_DECREASE: {
-    NORMAL: 1,
-    SICK: 2,
-  },
-  STAT_INCREASE: {
-    NORMAL: 15,
-    SICK: 5,
-  },
-  SPEED_MULTIPLIERS: {
-    HUNGER: 2,
-    HAPPINESS: 1.5,
-    AGE: 1,
-    CLEANLINESS: 1,
-  },
-  AGE_INCREASE: 1,
-  MAX_AGE: 100,
-  CLEANLINESS_DECREASE: 10,
+const LAYOUT = {
+  STATUS_BAR_HEIGHT: 120,
+  CONTROLS_HEIGHT: 120,
+  PIG_SAFE_PADDING: 50,
 } as const;
+
+const DEATH_MESSAGES = {
+  hunger: { emoji: "🍽️", message: "🐷 died from hunger..." },
+  happiness: { emoji: "😢", message: "🐷 died from sadness..." },
+  cleanliness: { emoji: "🦠", message: "🐷 died from uncleanliness..." },
+} as const;
+
+interface GameOverScreenProps {
+  causeOfDeath?: string;
+  onReset: () => void;
+}
+
+function GameOverScreen({ causeOfDeath, onReset }: GameOverScreenProps) {
+  const scaleAnim = useRef(new RNAnimated.Value(0)).current;
+
+  useEffect(() => {
+    RNAnimated.spring(scaleAnim, {
+      toValue: 1,
+      useNativeDriver: true,
+    }).start();
+  }, []);
+
+  const deathInfo =
+    causeOfDeath && causeOfDeath in DEATH_MESSAGES
+      ? DEATH_MESSAGES[causeOfDeath as keyof typeof DEATH_MESSAGES]
+      : { emoji: "💀", message: "Game Over" };
+
+  return (
+    <View style={styles.overlay}>
+      <RNAnimated.Text
+        style={[styles.gameOverEmoji, { transform: [{ scale: scaleAnim }] }]}
+      >
+        {deathInfo.emoji}
+      </RNAnimated.Text>
+      <Text style={styles.gameOverTitle}>Game Over</Text>
+      <Text style={styles.gameOverMessage}>{deathInfo.message}</Text>
+      <Pressable style={styles.resetButton} onPress={onReset}>
+        <Text style={styles.resetButtonText}>Start Again</Text>
+      </Pressable>
+    </View>
+  );
+}
+
+function YouWinScreen({ onReset }: { onReset: () => void }) {
+  const scaleAnim = useRef(new RNAnimated.Value(0)).current;
+
+  useEffect(() => {
+    RNAnimated.spring(scaleAnim, {
+      toValue: 1,
+      useNativeDriver: true,
+    }).start();
+  }, []);
+
+  return (
+    <View style={styles.overlay}>
+      <RNAnimated.Text
+        style={[styles.gameOverEmoji, { transform: [{ scale: scaleAnim }] }]}
+      >
+        🎉
+      </RNAnimated.Text>
+      <Text style={styles.gameOverTitle}>You Win!</Text>
+      <Pressable style={styles.resetButton} onPress={onReset}>
+        <Text style={styles.resetButtonText}>Play Again</Text>
+      </Pressable>
+    </View>
+  );
+}
 
 const LABEL_EMOJIS = {
   Hunger: "🍎",
@@ -62,7 +109,7 @@ function StatusBar({ label, value, color }: StatusBarProps) {
     <View style={styles.statusBarContainer}>
       <Text style={styles.statusEmoji}>{emoji}</Text>
       <View style={styles.statusBarTrack}>
-        <Animated.View
+        <RNAnimated.View
           style={[
             styles.statusBarFill,
             {
@@ -83,29 +130,29 @@ interface ActionEffectProps {
 }
 
 function ActionEffect({ emoji, isVisible }: ActionEffectProps) {
-  const scaleAnim = useRef(new Animated.Value(0)).current;
-  const opacityAnim = useRef(new Animated.Value(0)).current;
+  const scaleAnim = useRef(new RNAnimated.Value(0)).current;
+  const opacityAnim = useRef(new RNAnimated.Value(0)).current;
 
   useEffect(() => {
     if (isVisible) {
-      Animated.parallel([
-        Animated.spring(scaleAnim, {
+      RNAnimated.parallel([
+        RNAnimated.spring(scaleAnim, {
           toValue: 1,
           useNativeDriver: true,
         }),
-        Animated.timing(opacityAnim, {
+        RNAnimated.timing(opacityAnim, {
           toValue: 1,
           duration: 100,
           useNativeDriver: true,
         }),
       ]).start(() => {
-        Animated.parallel([
-          Animated.timing(scaleAnim, {
+        RNAnimated.parallel([
+          RNAnimated.timing(scaleAnim, {
             toValue: 2,
             duration: 300,
             useNativeDriver: true,
           }),
-          Animated.timing(opacityAnim, {
+          RNAnimated.timing(opacityAnim, {
             toValue: 0,
             duration: 300,
             useNativeDriver: true,
@@ -122,7 +169,7 @@ function ActionEffect({ emoji, isVisible }: ActionEffectProps) {
 
   return (
     <View style={styles.actionEffectContainer} pointerEvents="none">
-      <Animated.Text
+      <RNAnimated.Text
         style={[
           styles.actionEffectText,
           {
@@ -132,7 +179,7 @@ function ActionEffect({ emoji, isVisible }: ActionEffectProps) {
         ]}
       >
         {emoji}
-      </Animated.Text>
+      </RNAnimated.Text>
     </View>
   );
 }
@@ -141,16 +188,34 @@ export default function HomeScreen() {
   const { state, actions } = useGameState();
   const [currentAction, setCurrentAction] = useState<string | null>(null);
   const pigPosition = useRef(
-    new Animated.ValueXY({ x: SCREEN_WIDTH / 2, y: SCREEN_HEIGHT / 2 })
+    new RNAnimated.ValueXY({ x: SCREEN_WIDTH / 2, y: SCREEN_HEIGHT / 2 })
   ).current;
 
   const movePig = () => {
     if (state.isPaused) return;
 
-    const newX = Math.random() * (SCREEN_WIDTH - 50);
-    const newY = Math.random() * (SCREEN_HEIGHT - 200) + 100;
+    // Учитываем размер свинки (предположим 100x100) при расчете границ
+    const PIG_SIZE = 100;
 
-    Animated.spring(pigPosition, {
+    const minX = LAYOUT.PIG_SAFE_PADDING;
+    const maxX = SCREEN_WIDTH - LAYOUT.PIG_SAFE_PADDING - PIG_SIZE;
+    const minY = LAYOUT.STATUS_BAR_HEIGHT + LAYOUT.PIG_SAFE_PADDING;
+    const maxY =
+      SCREEN_HEIGHT -
+      LAYOUT.CONTROLS_HEIGHT -
+      LAYOUT.PIG_SAFE_PADDING -
+      PIG_SIZE;
+
+    const newX = Math.min(
+      maxX,
+      Math.max(minX, Math.random() * (maxX - minX) + minX)
+    );
+    const newY = Math.min(
+      maxY,
+      Math.max(minY, Math.random() * (maxY - minY) + minY)
+    );
+
+    RNAnimated.spring(pigPosition, {
       toValue: { x: newX, y: newY },
       useNativeDriver: false,
     }).start();
@@ -171,22 +236,15 @@ export default function HomeScreen() {
 
   if (state.isGameOver) {
     return (
-      <View style={styles.container}>
-        <Text style={styles.title}>Game Over!</Text>
-        <Text style={styles.text}>Your pig died of {state.causeOfDeath}</Text>
-        <Text style={styles.emoji}>💀</Text>
-      </View>
+      <GameOverScreen
+        causeOfDeath={state.causeOfDeath}
+        onReset={actions.reset}
+      />
     );
   }
 
   if (state.hasWon) {
-    return (
-      <View style={styles.container}>
-        <Text style={styles.title}>You Win! 🎉</Text>
-        <Text style={styles.text}>Your pig lived to 100 years!</Text>
-        <Text style={styles.emoji}>🎊</Text>
-      </View>
-    );
+    return <YouWinScreen onReset={actions.reset} />;
   }
 
   return (
@@ -209,7 +267,7 @@ export default function HomeScreen() {
         )}
       </View>
 
-      <View style={styles.statusBars}>
+      <View style={[styles.statusBars, { height: LAYOUT.STATUS_BAR_HEIGHT }]}>
         <StatusBar label="Hunger" value={state.hunger} color="#FF6B6B" />
         <StatusBar label="Happiness" value={state.happiness} color="#4ECDC4" />
         <StatusBar
@@ -221,28 +279,28 @@ export default function HomeScreen() {
       </View>
 
       {state.poops.map((poop) => (
-        <TouchableOpacity
+        <Pressable
           key={poop.id}
           style={[styles.poop, { left: poop.x, top: poop.y }]}
           onPress={() => actions.cleanPoop(poop.id)}
         >
           <Text style={styles.emoji}>💩</Text>
-        </TouchableOpacity>
+        </Pressable>
       ))}
 
-      <Animated.View style={[styles.pig, pigPosition.getLayout()]}>
+      <RNAnimated.View style={[styles.pig, pigPosition.getLayout()]}>
         <Text style={styles.emoji}>
           🐷
           {state.isSick && <Text style={styles.sickEmoji}>🤮</Text>}
         </Text>
-      </Animated.View>
+      </RNAnimated.View>
 
       <ActionEffect
         emoji={currentAction || ""}
         isVisible={currentAction !== null}
       />
 
-      <View style={styles.controls}>
+      <View style={[styles.controls, { height: LAYOUT.CONTROLS_HEIGHT }]}>
         <View style={styles.actionButtons}>
           <Pressable
             style={[styles.button, state.isPaused && styles.buttonDisabled]}
@@ -297,10 +355,11 @@ const styles = StyleSheet.create({
   },
   statusBars: {
     position: "absolute",
-    top: 16,
-    left: 16,
-    right: 16,
-    gap: 4,
+    top: 0,
+    left: 24,
+    right: 24,
+    paddingTop: 24,
+    gap: 8,
   },
   statusBarContainer: {
     flexDirection: "row",
@@ -355,9 +414,9 @@ const styles = StyleSheet.create({
   },
   controls: {
     position: "absolute",
-    bottom: 16,
-    left: 16,
-    right: 16,
+    bottom: 0,
+    left: 24,
+    right: 24,
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
@@ -405,5 +464,42 @@ const styles = StyleSheet.create({
   },
   actionEffectText: {
     fontSize: 100,
+  },
+  overlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    justifyContent: "center",
+    alignItems: "center",
+    zIndex: 50,
+  },
+  gameOverEmoji: {
+    fontSize: 100,
+    position: "absolute",
+  },
+  gameOverTitle: {
+    color: "white",
+    fontSize: 48,
+    fontWeight: "800",
+    marginTop: 120,
+  },
+  gameOverMessage: {
+    color: "white",
+    fontSize: 24,
+    fontWeight: "700",
+    marginTop: 16,
+  },
+  resetButton: {
+    backgroundColor: "#22c55e",
+    paddingHorizontal: 32,
+    paddingVertical: 16,
+    borderRadius: 9999,
+    marginTop: "auto",
+    marginBottom: 64,
+    transform: [{ scale: 1 }],
+  },
+  resetButtonText: {
+    color: "white",
+    fontSize: 20,
+    fontWeight: "700",
   },
 });

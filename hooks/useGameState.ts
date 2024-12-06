@@ -1,5 +1,15 @@
 import { useState, useEffect, useCallback } from "react";
+import { Dimensions } from "react-native";
 import { useGameSounds } from "./useGameSounds";
+
+const SCREEN_WIDTH = Dimensions.get("window").width;
+const SCREEN_HEIGHT = Dimensions.get("window").height;
+
+const LAYOUT = {
+  STATUS_BAR_HEIGHT: 200,
+  CONTROLS_HEIGHT: 100,
+  PIG_SAFE_PADDING: 50,
+} as const;
 
 const GAME_CONFIG = {
   TICK_RATE: 1000,
@@ -44,6 +54,20 @@ export function useGameState() {
     isPaused: false,
   });
 
+  const reset = useCallback(() => {
+    setState({
+      hunger: GAME_CONFIG.MAX_STAT_VALUE,
+      happiness: GAME_CONFIG.MAX_STAT_VALUE,
+      cleanliness: GAME_CONFIG.MAX_STAT_VALUE,
+      age: 0,
+      isSick: false,
+      isGameOver: false,
+      hasWon: false,
+      poops: [],
+      isPaused: false,
+    });
+  }, []);
+
   const togglePause = useCallback(() => {
     setState((prev) => ({ ...prev, isPaused: !prev.isPaused }));
   }, []);
@@ -66,7 +90,7 @@ export function useGameState() {
       );
       const newCleanliness = Math.max(
         GAME_CONFIG.MIN_STAT_VALUE,
-        prev.cleanliness - prev.poops.length
+        prev.cleanliness - GAME_CONFIG.STAT_DECREASE.NORMAL
       );
 
       if (newHunger === GAME_CONFIG.MIN_STAT_VALUE) {
@@ -94,12 +118,24 @@ export function useGameState() {
       poops: [
         ...prev.poops,
         {
-          x: Math.random() * 300,
-          y: Math.random() * 500,
+          x:
+            Math.random() * (SCREEN_WIDTH - LAYOUT.PIG_SAFE_PADDING * 2) +
+            LAYOUT.PIG_SAFE_PADDING,
+          y:
+            Math.random() *
+              (SCREEN_HEIGHT -
+                LAYOUT.STATUS_BAR_HEIGHT -
+                LAYOUT.CONTROLS_HEIGHT -
+                LAYOUT.PIG_SAFE_PADDING * 2) +
+            LAYOUT.STATUS_BAR_HEIGHT +
+            LAYOUT.PIG_SAFE_PADDING,
           id: Date.now(),
         },
       ],
-      cleanliness: Math.max(GAME_CONFIG.MIN_STAT_VALUE, prev.cleanliness - 10),
+      cleanliness: Math.max(
+        GAME_CONFIG.MIN_STAT_VALUE,
+        prev.cleanliness - GAME_CONFIG.STAT_DECREASE.NORMAL
+      ),
     }));
   }, []);
 
@@ -198,6 +234,7 @@ export function useGameState() {
       heal,
       cleanPoop,
       togglePause,
+      reset,
     },
   };
 }
