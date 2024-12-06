@@ -14,6 +14,31 @@ import { useGameState } from "@/hooks/useGameState";
 const SCREEN_WIDTH = Dimensions.get("window").width;
 const SCREEN_HEIGHT = Dimensions.get("window").height;
 
+const GAME_CONFIG = {
+  TICK_RATE: 1000,
+  POOP_CHANCE: 0.15,
+  SICK_CHANCE: 0.08,
+  MAX_STAT_VALUE: 100,
+  MIN_STAT_VALUE: 0,
+  STAT_DECREASE: {
+    NORMAL: 1,
+    SICK: 2,
+  },
+  STAT_INCREASE: {
+    NORMAL: 15,
+    SICK: 5,
+  },
+  SPEED_MULTIPLIERS: {
+    HUNGER: 2,
+    HAPPINESS: 1.5,
+    AGE: 1,
+    CLEANLINESS: 1,
+  },
+  AGE_INCREASE: 1,
+  MAX_AGE: 100,
+  CLEANLINESS_DECREASE: 10,
+} as const;
+
 const LABEL_EMOJIS = {
   Hunger: "🍎",
   Happiness: "😊",
@@ -52,15 +77,75 @@ function StatusBar({ label, value, color }: StatusBarProps) {
   );
 }
 
+interface ActionEffectProps {
+  emoji: string;
+  isVisible: boolean;
+}
+
+function ActionEffect({ emoji, isVisible }: ActionEffectProps) {
+  const scaleAnim = useRef(new Animated.Value(0)).current;
+  const opacityAnim = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    if (isVisible) {
+      Animated.parallel([
+        Animated.spring(scaleAnim, {
+          toValue: 1,
+          useNativeDriver: true,
+        }),
+        Animated.timing(opacityAnim, {
+          toValue: 1,
+          duration: 100,
+          useNativeDriver: true,
+        }),
+      ]).start(() => {
+        Animated.parallel([
+          Animated.timing(scaleAnim, {
+            toValue: 2,
+            duration: 300,
+            useNativeDriver: true,
+          }),
+          Animated.timing(opacityAnim, {
+            toValue: 0,
+            duration: 300,
+            useNativeDriver: true,
+          }),
+        ]).start();
+      });
+    } else {
+      scaleAnim.setValue(0);
+      opacityAnim.setValue(0);
+    }
+  }, [isVisible]);
+
+  if (!isVisible) return null;
+
+  return (
+    <View style={styles.actionEffectContainer} pointerEvents="none">
+      <Animated.Text
+        style={[
+          styles.actionEffectText,
+          {
+            transform: [{ scale: scaleAnim }],
+            opacity: opacityAnim,
+          },
+        ]}
+      >
+        {emoji}
+      </Animated.Text>
+    </View>
+  );
+}
+
 export default function HomeScreen() {
   const { state, actions } = useGameState();
-  const [isPaused, setIsPaused] = useState(false);
+  const [currentAction, setCurrentAction] = useState<string | null>(null);
   const pigPosition = useRef(
     new Animated.ValueXY({ x: SCREEN_WIDTH / 2, y: SCREEN_HEIGHT / 2 })
   ).current;
 
   const movePig = () => {
-    if (isPaused) return;
+    if (state.isPaused) return;
 
     const newX = Math.random() * (SCREEN_WIDTH - 50);
     const newY = Math.random() * (SCREEN_HEIGHT - 200) + 100;
@@ -74,11 +159,13 @@ export default function HomeScreen() {
   useEffect(() => {
     const moveInterval = setInterval(movePig, 3000);
     return () => clearInterval(moveInterval);
-  }, [isPaused]);
+  }, [state.isPaused]);
 
-  const handleAction = (action: () => void) => {
-    if (!isPaused) {
+  const handleAction = (action: () => void, emoji: string) => {
+    if (!state.isPaused) {
       action();
+      setCurrentAction(emoji);
+      setTimeout(() => setCurrentAction(null), 400);
     }
   };
 
@@ -150,34 +237,39 @@ export default function HomeScreen() {
         </Text>
       </Animated.View>
 
+      <ActionEffect
+        emoji={currentAction || ""}
+        isVisible={currentAction !== null}
+      />
+
       <View style={styles.controls}>
         <View style={styles.actionButtons}>
           <Pressable
-            style={[styles.button, isPaused && styles.buttonDisabled]}
-            onPress={() => handleAction(actions.feed)}
-            disabled={isPaused}
+            style={[styles.button, state.isPaused && styles.buttonDisabled]}
+            onPress={() => handleAction(actions.feed, "🍎")}
+            disabled={state.isPaused}
           >
             <Text style={styles.buttonText}>🍎</Text>
           </Pressable>
           <Pressable
-            style={[styles.button, isPaused && styles.buttonDisabled]}
-            onPress={() => handleAction(actions.play)}
-            disabled={isPaused}
+            style={[styles.button, state.isPaused && styles.buttonDisabled]}
+            onPress={() => handleAction(actions.play, "⚽")}
+            disabled={state.isPaused}
           >
             <Text style={styles.buttonText}>⚽</Text>
           </Pressable>
           {state.isSick && (
             <Pressable
-              style={[styles.button, isPaused && styles.buttonDisabled]}
-              onPress={() => handleAction(actions.heal)}
-              disabled={isPaused}
+              style={[styles.button, state.isPaused && styles.buttonDisabled]}
+              onPress={() => handleAction(actions.heal, "💊")}
+              disabled={state.isPaused}
             >
               <Text style={styles.buttonText}>💊</Text>
             </Pressable>
           )}
         </View>
-        <Pressable style={styles.button} onPress={() => setIsPaused(!isPaused)}>
-          <Text style={styles.buttonText}>{isPaused ? "▶️" : "⏸️"}</Text>
+        <Pressable style={styles.button} onPress={actions.togglePause}>
+          <Text style={styles.buttonText}>{state.isPaused ? "▶️" : "⏸️"}</Text>
         </Pressable>
       </View>
     </View>
@@ -304,5 +396,14 @@ const styles = StyleSheet.create({
     textShadowOffset: { width: 1, height: 1 },
     textShadowRadius: 3,
     marginTop: 8,
+  },
+  actionEffectContainer: {
+    ...StyleSheet.absoluteFillObject,
+    justifyContent: "center",
+    alignItems: "center",
+    zIndex: 1,
+  },
+  actionEffectText: {
+    fontSize: 100,
   },
 });

@@ -1,6 +1,21 @@
 import { useState, useEffect, useCallback } from "react";
-import { Audio } from "expo-av";
 import { useGameSounds } from "./useGameSounds";
+
+const GAME_CONFIG = {
+  TICK_RATE: 1000,
+  POOP_CHANCE: 0.15,
+  SICK_CHANCE: 0.08,
+  MAX_STAT_VALUE: 100,
+  MIN_STAT_VALUE: 0,
+  STAT_DECREASE: {
+    NORMAL: 1,
+    SICK: 2,
+  },
+  STAT_INCREASE: {
+    NORMAL: 15,
+    SICK: 5,
+  },
+} as const;
 
 interface GameState {
   hunger: number;
@@ -12,39 +27,55 @@ interface GameState {
   hasWon: boolean;
   poops: Array<{ x: number; y: number; id: number }>;
   causeOfDeath?: string;
+  isPaused: boolean;
 }
 
 export function useGameState() {
   const { playSound } = useGameSounds();
   const [state, setState] = useState<GameState>({
-    hunger: 100,
-    happiness: 100,
-    cleanliness: 100,
+    hunger: GAME_CONFIG.MAX_STAT_VALUE,
+    happiness: GAME_CONFIG.MAX_STAT_VALUE,
+    cleanliness: GAME_CONFIG.MAX_STAT_VALUE,
     age: 0,
     isSick: false,
     isGameOver: false,
     hasWon: false,
     poops: [],
+    isPaused: false,
   });
 
+  const togglePause = useCallback(() => {
+    setState((prev) => ({ ...prev, isPaused: !prev.isPaused }));
+  }, []);
+
   const decreaseStats = useCallback(() => {
+    if (state.isPaused) return;
+
     setState((prev) => {
-      const decreaseRate = prev.isSick ? 2 : 1;
-      const newHunger = Math.max(0, prev.hunger - 0.5 * decreaseRate);
-      const newHappiness = Math.max(0, prev.happiness - 0.3 * decreaseRate);
+      const decreaseRate = prev.isSick
+        ? GAME_CONFIG.STAT_DECREASE.SICK
+        : GAME_CONFIG.STAT_DECREASE.NORMAL;
+
+      const newHunger = Math.max(
+        GAME_CONFIG.MIN_STAT_VALUE,
+        prev.hunger - decreaseRate * 2
+      );
+      const newHappiness = Math.max(
+        GAME_CONFIG.MIN_STAT_VALUE,
+        prev.happiness - decreaseRate * 1.5
+      );
       const newCleanliness = Math.max(
-        0,
-        prev.cleanliness - prev.poops.length * 0.5
+        GAME_CONFIG.MIN_STAT_VALUE,
+        prev.cleanliness - prev.poops.length
       );
 
-      // Проверка на проигрыш
-      if (newHunger === 0) {
+      if (newHunger === GAME_CONFIG.MIN_STAT_VALUE) {
         return { ...prev, isGameOver: true, causeOfDeath: "hunger" };
       }
-      if (newHappiness === 0) {
+      if (newHappiness === GAME_CONFIG.MIN_STAT_VALUE) {
         return { ...prev, isGameOver: true, causeOfDeath: "sadness" };
       }
-      if (newCleanliness === 0) {
+      if (newCleanliness === GAME_CONFIG.MIN_STAT_VALUE) {
         return { ...prev, isGameOver: true, causeOfDeath: "dirt" };
       }
 
@@ -55,7 +86,7 @@ export function useGameState() {
         cleanliness: newCleanliness,
       };
     });
-  }, []);
+  }, [state.isPaused]);
 
   const addPoop = useCallback(() => {
     setState((prev) => ({
@@ -68,6 +99,7 @@ export function useGameState() {
           id: Date.now(),
         },
       ],
+      cleanliness: Math.max(GAME_CONFIG.MIN_STAT_VALUE, prev.cleanliness - 10),
     }));
   }, []);
 
@@ -77,7 +109,10 @@ export function useGameState() {
       setState((prev) => ({
         ...prev,
         poops: prev.poops.filter((poop) => poop.id !== poopId),
-        cleanliness: Math.min(100, prev.cleanliness + 10),
+        cleanliness: Math.min(
+          GAME_CONFIG.MAX_STAT_VALUE,
+          prev.cleanliness + GAME_CONFIG.STAT_INCREASE.NORMAL
+        ),
       }));
     },
     [playSound]
@@ -87,7 +122,13 @@ export function useGameState() {
     playSound("feed");
     setState((prev) => ({
       ...prev,
-      hunger: Math.min(100, prev.hunger + 20),
+      hunger: Math.min(
+        GAME_CONFIG.MAX_STAT_VALUE,
+        prev.hunger +
+          (prev.isSick
+            ? GAME_CONFIG.STAT_INCREASE.SICK
+            : GAME_CONFIG.STAT_INCREASE.NORMAL)
+      ),
     }));
   }, [playSound]);
 
@@ -95,7 +136,13 @@ export function useGameState() {
     playSound("play");
     setState((prev) => ({
       ...prev,
-      happiness: Math.min(100, prev.happiness + 15),
+      happiness: Math.min(
+        GAME_CONFIG.MAX_STAT_VALUE,
+        prev.happiness +
+          (prev.isSick
+            ? GAME_CONFIG.STAT_INCREASE.SICK
+            : GAME_CONFIG.STAT_INCREASE.NORMAL)
+      ),
     }));
   }, [playSound]);
 
@@ -109,10 +156,9 @@ export function useGameState() {
 
   useEffect(() => {
     const gameInterval = setInterval(() => {
-      if (!state.isGameOver && !state.hasWon) {
+      if (!state.isGameOver && !state.hasWon && !state.isPaused) {
         decreaseStats();
 
-        // Увеличиваем возраст
         setState((prev) => {
           const newAge = prev.age + 0.1;
           if (newAge >= 100) {
@@ -121,20 +167,20 @@ export function useGameState() {
           return { ...prev, age: newAge };
         });
 
-        // Случайная болезнь
-        if (Math.random() < 0.001) {
+        // Шанс заболеть
+        if (Math.random() < GAME_CONFIG.SICK_CHANCE) {
           setState((prev) => ({ ...prev, isSick: true }));
         }
 
-        // Случайные какашки
-        if (Math.random() < 0.05) {
+        // Шанс покакать
+        if (Math.random() < GAME_CONFIG.POOP_CHANCE) {
           addPoop();
         }
       }
-    }, 1000);
+    }, GAME_CONFIG.TICK_RATE);
 
     return () => clearInterval(gameInterval);
-  }, [state.isGameOver, state.hasWon, decreaseStats, addPoop]);
+  }, [state.isGameOver, state.hasWon, state.isPaused, decreaseStats, addPoop]);
 
   useEffect(() => {
     if (state.isGameOver) {
@@ -151,6 +197,7 @@ export function useGameState() {
       play,
       heal,
       cleanPoop,
+      togglePause,
     },
   };
 }
