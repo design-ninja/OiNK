@@ -46,21 +46,10 @@ export default function HomeScreen() {
   return (
     <View style={styles.container}>
       <View style={styles.backgroundPattern}>
-        {Array.from({ length: Math.ceil(SCREEN_HEIGHT / 48) + 1 }).map(
-          (_, rowIndex) => (
-            <View key={`row-${rowIndex}`} style={styles.backgroundRow}>
-              {Array.from({ length: Math.ceil(SCREEN_WIDTH / 48) + 1 }).map(
-                (_, colIndex) => (
-                  <Image
-                    key={`tile-${rowIndex}-${colIndex}`}
-                    source={require("@/assets/images/grass.png")}
-                    style={styles.grassTile}
-                  />
-                )
-              )}
-            </View>
-          )
-        )}
+        <Image
+          source={require("@/assets/images/grass.png")}
+          style={styles.grassBackground}
+        />
       </View>
 
       <StatusBars
@@ -118,15 +107,12 @@ const styles = StyleSheet.create({
     position: "absolute",
     width: SCREEN_WIDTH,
     height: SCREEN_HEIGHT,
-    flexDirection: "column",
-    overflow: "hidden",
+    backgroundColor: "#90BE6D",
   },
-  backgroundRow: {
-    flexDirection: "row",
-  },
-  grassTile: {
-    width: 48,
-    height: 48,
+  grassBackground: {
+    width: "100%",
+    height: "100%",
+    resizeMode: "cover",
   },
   actionEffectContainer: {
     ...StyleSheet.absoluteFillObject,
