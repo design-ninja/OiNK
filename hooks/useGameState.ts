@@ -120,6 +120,7 @@ export function useGameState() {
   }, [state.isPaused]);
 
   const addPoop = useCallback(() => {
+    playSound("poop");
     setState((prev) => ({
       ...prev,
       poops: [
@@ -144,7 +145,7 @@ export function useGameState() {
         prev.cleanliness - GAME_CONFIG.STAT_DECREASE.NORMAL
       ),
     }));
-  }, []);
+  }, [playSound]);
 
   const cleanPoop = useCallback(
     (poopId: number) => {
