@@ -31,9 +31,9 @@ export function useGameSounds() {
           clean: require("@/assets/sounds/clean.mp3"),
           sick: require("@/assets/sounds/sick.mp3"),
           poop: require("@/assets/sounds/poop.mp3"),
+          heal: require("@/assets/sounds/heal.mp3"),
           gameOver: require("@/assets/sounds/gameover.mp3"),
           win: require("@/assets/sounds/win.mp3"),
-          heal: require("@/assets/sounds/heal.mp3"),
         };
 
         for (const [key, file] of Object.entries(soundFiles)) {
