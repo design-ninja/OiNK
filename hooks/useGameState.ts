@@ -225,6 +225,7 @@ export function useGameState() {
 
         // Шанс заболеть
         if (Math.random() < GAME_CONFIG.SICK_CHANCE) {
+          playSound("sick");
           setState((prev) => ({ ...prev, isSick: true }));
         }
 
@@ -236,7 +237,14 @@ export function useGameState() {
     }, GAME_CONFIG.TICK_RATE);
 
     return () => clearInterval(gameInterval);
-  }, [state.isGameOver, state.hasWon, state.isPaused, decreaseStats, addPoop]);
+  }, [
+    state.isGameOver,
+    state.hasWon,
+    state.isPaused,
+    decreaseStats,
+    addPoop,
+    playSound,
+  ]);
 
   useEffect(() => {
     if (state.isGameOver) {
