@@ -1,20 +1,14 @@
-import { useState, useEffect, useRef } from "react";
-import {
-  View,
-  StyleSheet,
-  Image,
-  Dimensions,
-  Pressable,
-  Text,
-  Animated as RNAnimated,
-  Easing,
-} from "react-native";
+import { useState, useEffect } from "react";
+import { View, StyleSheet, Image, Dimensions } from "react-native";
 import { useGameState } from "@/hooks/useGameState";
 import { useGameSounds } from "@/hooks/useGameSounds";
-import { AnimatedPoop } from "@/components/AnimatedPoop";
+import { Poop } from "@/components/Poop";
 import { GameOverScreen } from "@/app/screens/GameOverScreen";
 import { YouWinScreen } from "@/app/screens/YouWinScreen";
-import { StatusBar } from "@/components/StatusBar";
+import { Controls } from "@/components/Controls";
+import { StatusBars } from "@/components/StatusBars";
+import { Pig } from "@/components/Pig";
+import { ActionEffect } from "@/components/ActionEffect";
 
 const SCREEN_WIDTH = Dimensions.get("window").width;
 const SCREEN_HEIGHT = Dimensions.get("window").height;
@@ -25,113 +19,14 @@ const LAYOUT = {
   PIG_SAFE_PADDING: 50,
 } as const;
 
-interface ActionEffectProps {
-  emoji: string;
-  isVisible: boolean;
-}
-
-function ActionEffect({ emoji, isVisible }: ActionEffectProps) {
-  const scaleAnim = useRef(new RNAnimated.Value(0)).current;
-  const opacityAnim = useRef(new RNAnimated.Value(0)).current;
-
-  useEffect(() => {
-    if (isVisible) {
-      RNAnimated.parallel([
-        RNAnimated.spring(scaleAnim, {
-          toValue: 1,
-          useNativeDriver: true,
-        }),
-        RNAnimated.timing(opacityAnim, {
-          toValue: 1,
-          duration: 100,
-          useNativeDriver: true,
-        }),
-      ]).start(() => {
-        RNAnimated.parallel([
-          RNAnimated.timing(scaleAnim, {
-            toValue: 2,
-            duration: 300,
-            useNativeDriver: true,
-          }),
-          RNAnimated.timing(opacityAnim, {
-            toValue: 0,
-            duration: 300,
-            useNativeDriver: true,
-          }),
-        ]).start();
-      });
-    } else {
-      scaleAnim.setValue(0);
-      opacityAnim.setValue(0);
-    }
-  }, [isVisible]);
-
-  if (!isVisible) return null;
-
-  return (
-    <View style={styles.actionEffectContainer} pointerEvents="none">
-      <RNAnimated.Text
-        style={[
-          styles.actionEffectText,
-          {
-            transform: [{ scale: scaleAnim }],
-            opacity: opacityAnim,
-          },
-        ]}
-      >
-        {emoji}
-      </RNAnimated.Text>
-    </View>
-  );
-}
-
 export default function HomeScreen() {
   const { state, actions } = useGameState();
   const [currentAction, setCurrentAction] = useState<string | null>(null);
-  const { playSound, playBackgroundMusic } = useGameSounds();
-  const pigPosition = useRef(
-    new RNAnimated.ValueXY({ x: SCREEN_WIDTH / 2, y: SCREEN_HEIGHT / 2 })
-  ).current;
+  const { playBackgroundMusic } = useGameSounds();
 
   useEffect(() => {
     playBackgroundMusic();
   }, []);
-
-  const movePig = () => {
-    if (state.isPaused) return;
-
-    const PIG_SIZE = 100;
-
-    const minX = LAYOUT.PIG_SAFE_PADDING;
-    const maxX = SCREEN_WIDTH - LAYOUT.PIG_SAFE_PADDING - PIG_SIZE;
-    const minY = LAYOUT.STATUS_BAR_HEIGHT + LAYOUT.PIG_SAFE_PADDING;
-    const maxY =
-      SCREEN_HEIGHT -
-      LAYOUT.CONTROLS_HEIGHT -
-      LAYOUT.PIG_SAFE_PADDING -
-      PIG_SIZE;
-
-    const newX = Math.min(
-      maxX,
-      Math.max(minX, Math.random() * (maxX - minX) + minX)
-    );
-    const newY = Math.min(
-      maxY,
-      Math.max(minY, Math.random() * (maxY - minY) + minY)
-    );
-
-    RNAnimated.spring(pigPosition, {
-      toValue: { x: newX, y: newY },
-      useNativeDriver: false,
-      bounciness: 4,
-      speed: 8,
-    }).start();
-  };
-
-  useEffect(() => {
-    const moveInterval = setInterval(movePig, 2500);
-    return () => clearInterval(moveInterval);
-  }, [state.isPaused]);
 
   const handleAction = (action: () => void, emoji: string) => {
     if (!state.isPaused) {
@@ -174,19 +69,16 @@ export default function HomeScreen() {
         )}
       </View>
 
-      <View style={[styles.statusBars, { height: LAYOUT.STATUS_BAR_HEIGHT }]}>
-        <StatusBar label="Hunger" value={state.hunger} color="#FF6B6B" />
-        <StatusBar label="Happiness" value={state.happiness} color="#4ECDC4" />
-        <StatusBar
-          label="Cleanliness"
-          value={state.cleanliness}
-          color="#45B7D1"
-        />
-        <StatusBar label="Age" value={state.age} color="#96CEB4" />
-      </View>
+      <StatusBars
+        height={LAYOUT.STATUS_BAR_HEIGHT}
+        hunger={state.hunger}
+        happiness={state.happiness}
+        cleanliness={state.cleanliness}
+        age={state.age}
+      />
 
       {state.poops.map((poop) => (
-        <AnimatedPoop
+        <Poop
           key={poop.id}
           x={poop.x}
           y={poop.y}
@@ -195,48 +87,28 @@ export default function HomeScreen() {
         />
       ))}
 
-      <RNAnimated.View style={[styles.pig, pigPosition.getLayout()]}>
-        <Text style={styles.emoji}>
-          🐷
-          {state.isSick && <Text style={styles.sickEmoji}>🤮</Text>}
-        </Text>
-      </RNAnimated.View>
+      <Pig
+        isSick={state.isSick}
+        isPaused={state.isPaused}
+        statusBarHeight={LAYOUT.STATUS_BAR_HEIGHT}
+        controlsHeight={LAYOUT.CONTROLS_HEIGHT}
+        safePadding={LAYOUT.PIG_SAFE_PADDING}
+      />
 
       <ActionEffect
         emoji={currentAction || ""}
         isVisible={currentAction !== null}
       />
 
-      <View style={[styles.controls, { height: LAYOUT.CONTROLS_HEIGHT }]}>
-        <View style={styles.actionButtons}>
-          <Pressable
-            style={[styles.button, state.isPaused && styles.buttonDisabled]}
-            onPress={() => handleAction(actions.feed, "🍎")}
-            disabled={state.isPaused}
-          >
-            <Text style={styles.buttonText}>🍎</Text>
-          </Pressable>
-          <Pressable
-            style={[styles.button, state.isPaused && styles.buttonDisabled]}
-            onPress={() => handleAction(actions.play, "⚽")}
-            disabled={state.isPaused}
-          >
-            <Text style={styles.buttonText}>⚽</Text>
-          </Pressable>
-          {state.isSick && (
-            <Pressable
-              style={[styles.button, state.isPaused && styles.buttonDisabled]}
-              onPress={() => handleAction(actions.heal, "💊")}
-              disabled={state.isPaused}
-            >
-              <Text style={styles.buttonText}>💊</Text>
-            </Pressable>
-          )}
-        </View>
-        <Pressable style={styles.button} onPress={actions.togglePause}>
-          <Text style={styles.buttonText}>{state.isPaused ? "▶️" : "⏸️"}</Text>
-        </Pressable>
-      </View>
+      <Controls
+        height={LAYOUT.CONTROLS_HEIGHT}
+        onFeed={() => handleAction(actions.feed, "🍎")}
+        onPlay={() => handleAction(actions.play, "⚽")}
+        onHeal={() => handleAction(actions.heal, "💊")}
+        onTogglePause={actions.togglePause}
+        isPaused={state.isPaused}
+        isSick={state.isSick}
+      />
     </View>
   );
 }
@@ -261,111 +133,6 @@ const styles = StyleSheet.create({
     width: 48,
     height: 48,
   },
-  statusBars: {
-    position: "absolute",
-    top: 0,
-    left: 24,
-    right: 24,
-    paddingTop: 16,
-    gap: 2,
-  },
-  statusBarContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-  },
-  statusEmoji: {
-    fontSize: 24,
-    textShadowColor: "rgba(0, 0, 0, 0.3)",
-    textShadowOffset: { width: 1, height: 1 },
-    textShadowRadius: 3,
-  },
-  statusBarTrack: {
-    flex: 1,
-    height: 12,
-    backgroundColor: "rgba(0, 0, 0, 0.2)",
-    borderRadius: 6,
-    overflow: "hidden",
-  },
-  statusBarFill: {
-    height: "100%",
-  },
-  statusValue: {
-    fontSize: 16,
-    fontWeight: "bold",
-    color: "white",
-    textShadowColor: "rgba(0, 0, 0, 0.3)",
-    textShadowOffset: { width: 1, height: 1 },
-    textShadowRadius: 3,
-    minWidth: 30,
-    textAlign: "right",
-  },
-  pig: {
-    position: "absolute",
-  },
-  poop: {
-    position: "absolute",
-    width: 40,
-    height: 40,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  emoji: {
-    fontSize: 80,
-  },
-  poopEmoji: {
-    fontSize: 53,
-  },
-  sickEmoji: {
-    fontSize: 20,
-    position: "absolute",
-    top: -10,
-    right: -10,
-  },
-  controls: {
-    position: "absolute",
-    bottom: 0,
-    left: 24,
-    right: 24,
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-  },
-  actionButtons: {
-    flexDirection: "row",
-    gap: 16,
-  },
-  button: {
-    width: 60,
-    height: 60,
-    backgroundColor: "rgba(0, 0, 0, 0.3)",
-    borderRadius: 30,
-    justifyContent: "center",
-    alignItems: "center",
-    transform: [{ scale: 1 }],
-  },
-  buttonDisabled: {
-    opacity: 0.5,
-  },
-  buttonText: {
-    fontSize: 30,
-  },
-  title: {
-    fontSize: 32,
-    fontWeight: "bold",
-    color: "white",
-    textShadowColor: "rgba(0, 0, 0, 0.3)",
-    textShadowOffset: { width: 1, height: 1 },
-    textShadowRadius: 3,
-  },
-  text: {
-    fontSize: 16,
-    color: "white",
-    textShadowColor: "rgba(0, 0, 0, 0.3)",
-    textShadowOffset: { width: 1, height: 1 },
-    textShadowRadius: 3,
-    marginTop: 8,
-  },
   actionEffectContainer: {
     ...StyleSheet.absoluteFillObject,
     justifyContent: "center",
@@ -374,42 +141,5 @@ const styles = StyleSheet.create({
   },
   actionEffectText: {
     fontSize: 100,
-  },
-  overlay: {
-    ...StyleSheet.absoluteFillObject,
-    backgroundColor: "rgba(0, 0, 0, 0.5)",
-    justifyContent: "center",
-    alignItems: "center",
-    zIndex: 50,
-  },
-  gameOverEmoji: {
-    fontSize: 100,
-    position: "absolute",
-  },
-  gameOverTitle: {
-    color: "white",
-    fontSize: 48,
-    fontWeight: "800",
-    marginTop: 120,
-  },
-  gameOverMessage: {
-    color: "white",
-    fontSize: 24,
-    fontWeight: "700",
-    marginTop: 16,
-  },
-  resetButton: {
-    backgroundColor: "#22c55e",
-    paddingHorizontal: 32,
-    paddingVertical: 16,
-    borderRadius: 9999,
-    marginTop: "auto",
-    marginBottom: 64,
-    transform: [{ scale: 1 }],
-  },
-  resetButtonText: {
-    color: "white",
-    fontSize: 20,
-    fontWeight: "700",
   },
 });
