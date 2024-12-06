@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef } from "react";
 import {
   View,
   StyleSheet,
@@ -7,14 +7,16 @@ import {
   Pressable,
   Text,
   Animated as RNAnimated,
+  Easing,
 } from "react-native";
 import { useGameState } from "@/hooks/useGameState";
+import { useGameSounds } from "@/hooks/useGameSounds";
 
 const SCREEN_WIDTH = Dimensions.get("window").width;
 const SCREEN_HEIGHT = Dimensions.get("window").height;
 
 const LAYOUT = {
-  STATUS_BAR_HEIGHT: 120,
+  STATUS_BAR_HEIGHT: 200,
   CONTROLS_HEIGHT: 120,
   PIG_SAFE_PADDING: 50,
 } as const;
@@ -105,6 +107,17 @@ function StatusBar({ label, value, color }: StatusBarProps) {
   const displayValue = isAge ? Math.floor(value) : Math.round(value);
   const percentage = isAge ? (value / 100) * 100 : value;
 
+  const widthAnim = useRef(new RNAnimated.Value(percentage)).current;
+
+  useEffect(() => {
+    RNAnimated.timing(widthAnim, {
+      toValue: percentage,
+      duration: 1000,
+      useNativeDriver: false,
+      easing: Easing.linear,
+    }).start();
+  }, [percentage]);
+
   return (
     <View style={styles.statusBarContainer}>
       <Text style={styles.statusEmoji}>{emoji}</Text>
@@ -114,7 +127,10 @@ function StatusBar({ label, value, color }: StatusBarProps) {
             styles.statusBarFill,
             {
               backgroundColor: color,
-              width: `${percentage}%`,
+              width: widthAnim.interpolate({
+                inputRange: [0, 100],
+                outputRange: ["0%", "100%"],
+              }),
             },
           ]}
         />
@@ -187,14 +203,18 @@ function ActionEffect({ emoji, isVisible }: ActionEffectProps) {
 export default function HomeScreen() {
   const { state, actions } = useGameState();
   const [currentAction, setCurrentAction] = useState<string | null>(null);
+  const { playSound, playBackgroundMusic } = useGameSounds();
   const pigPosition = useRef(
     new RNAnimated.ValueXY({ x: SCREEN_WIDTH / 2, y: SCREEN_HEIGHT / 2 })
   ).current;
 
+  useEffect(() => {
+    playBackgroundMusic();
+  }, []);
+
   const movePig = () => {
     if (state.isPaused) return;
 
-    // Учитываем размер свинки (предположим 100x100) при расчете границ
     const PIG_SIZE = 100;
 
     const minX = LAYOUT.PIG_SAFE_PADDING;
@@ -218,11 +238,13 @@ export default function HomeScreen() {
     RNAnimated.spring(pigPosition, {
       toValue: { x: newX, y: newY },
       useNativeDriver: false,
+      bounciness: 4,
+      speed: 8,
     }).start();
   };
 
   useEffect(() => {
-    const moveInterval = setInterval(movePig, 3000);
+    const moveInterval = setInterval(movePig, 2500);
     return () => clearInterval(moveInterval);
   }, [state.isPaused]);
 
@@ -284,7 +306,7 @@ export default function HomeScreen() {
           style={[styles.poop, { left: poop.x, top: poop.y }]}
           onPress={() => actions.cleanPoop(poop.id)}
         >
-          <Text style={styles.emoji}>💩</Text>
+          <Text style={styles.poopEmoji}>💩</Text>
         </Pressable>
       ))}
 
@@ -336,15 +358,16 @@ export default function HomeScreen() {
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
+    width: SCREEN_WIDTH,
+    height: SCREEN_HEIGHT,
+    overflow: "hidden",
   },
   backgroundPattern: {
     position: "absolute",
-    width: "100%",
-    height: "100%",
+    width: SCREEN_WIDTH,
+    height: SCREEN_HEIGHT,
     flexDirection: "column",
+    overflow: "hidden",
   },
   backgroundRow: {
     flexDirection: "row",
@@ -358,8 +381,8 @@ const styles = StyleSheet.create({
     top: 0,
     left: 24,
     right: 24,
-    paddingTop: 24,
-    gap: 8,
+    paddingTop: 16,
+    gap: 2,
   },
   statusBarContainer: {
     flexDirection: "row",
@@ -401,10 +424,12 @@ const styles = StyleSheet.create({
     height: 40,
     justifyContent: "center",
     alignItems: "center",
-    fontSize: 40,
   },
   emoji: {
     fontSize: 80,
+  },
+  poopEmoji: {
+    fontSize: 53,
   },
   sickEmoji: {
     fontSize: 20,
