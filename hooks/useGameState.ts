@@ -21,6 +21,7 @@ const GAME_CONFIG = {
   STAT_DECREASE: {
     NORMAL: 0.8,
     SICK: 1.5,
+    CLEANLINESS: 1.2,
   },
   STAT_INCREASE: {
     NORMAL: 20,
@@ -101,7 +102,8 @@ export function useGameState() {
       );
       const newCleanliness = Math.max(
         GAME_CONFIG.MIN_STAT_VALUE,
-        prev.cleanliness - GAME_CONFIG.STAT_DECREASE.NORMAL
+        prev.cleanliness -
+          GAME_CONFIG.STAT_DECREASE.CLEANLINESS * (1 + prev.poops.length * 0.5)
       );
 
       if (newHunger === GAME_CONFIG.MIN_STAT_VALUE) {
@@ -125,30 +127,25 @@ export function useGameState() {
 
   const addPoop = useCallback(() => {
     playSound("poop");
-    setState((prev) => ({
-      ...prev,
-      poops: [
-        ...prev.poops,
-        {
-          x:
-            Math.random() * (SCREEN_WIDTH - LAYOUT.PIG_SAFE_PADDING * 2) +
-            LAYOUT.PIG_SAFE_PADDING,
-          y:
-            Math.random() *
-              (SCREEN_HEIGHT -
-                LAYOUT.STATUS_BAR_HEIGHT -
-                LAYOUT.CONTROLS_HEIGHT -
-                LAYOUT.PIG_SAFE_PADDING * 2) +
-            LAYOUT.STATUS_BAR_HEIGHT +
-            LAYOUT.PIG_SAFE_PADDING,
-          id: Date.now(),
-        },
-      ],
-      cleanliness: Math.max(
+    setState((prev) => {
+      const newPoop = {
+        id: Date.now(),
+        x: Math.random() * (SCREEN_WIDTH - 100) + 50,
+        y: Math.random() * (SCREEN_HEIGHT - 200) + 100,
+      };
+
+      // Мгновенное уменьшение чистоты при появлении какашки
+      const newCleanliness = Math.max(
         GAME_CONFIG.MIN_STAT_VALUE,
-        prev.cleanliness - GAME_CONFIG.STAT_DECREASE.NORMAL
-      ),
-    }));
+        prev.cleanliness - 10
+      );
+
+      return {
+        ...prev,
+        poops: [...prev.poops, newPoop],
+        cleanliness: newCleanliness,
+      };
+    });
   }, [playSound]);
 
   const cleanPoop = useCallback(
