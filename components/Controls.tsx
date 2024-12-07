@@ -56,7 +56,7 @@ export function Controls({
 const styles = StyleSheet.create({
   controls: {
     position: "absolute",
-    bottom: 16,
+    bottom: 24,
     left: 24,
     right: 24,
     display: "flex",

@@ -14,17 +14,17 @@ const LAYOUT = {
 
 const GAME_CONFIG = {
   TICK_RATE: 1800,
-  POOP_CHANCE: 0.15,
+  POOP_CHANCE: 0.12,
   SICK_CHANCE: 0.08,
   MAX_STAT_VALUE: 100,
   MIN_STAT_VALUE: 0,
   STAT_DECREASE: {
-    NORMAL: 1,
-    SICK: 2,
+    NORMAL: 0.8,
+    SICK: 1.5,
   },
   STAT_INCREASE: {
-    NORMAL: 15,
-    SICK: 5,
+    NORMAL: 20,
+    SICK: 8,
   },
 } as const;
 
@@ -87,9 +87,9 @@ export function useGameState() {
         ? GAME_CONFIG.STAT_DECREASE.SICK
         : GAME_CONFIG.STAT_DECREASE.NORMAL;
 
-      const poopMultiplier = 1 + prev.poops.length * 0.5;
+      const poopMultiplier = 1 + prev.poops.length * 0.3;
 
-      const ageMultiplier = 1 + prev.age / 20;
+      const ageMultiplier = 1 + prev.age / 30;
 
       const newHunger = Math.max(
         GAME_CONFIG.MIN_STAT_VALUE,
@@ -230,17 +230,17 @@ export function useGameState() {
           // Базовый шанс заболевания
           let sickChance = GAME_CONFIG.SICK_CHANCE;
 
-          // Увеличиваем шанс на 10% за каждую какашку
-          sickChance += prev.poops.length * 0.1;
+          // Увеличиваем шанс на 5% за каждую какашку
+          sickChance += prev.poops.length * 0.05;
 
           // Увеличиваем шанс при низкой радости (ниже 50)
           if (prev.happiness < 50) {
-            sickChance += (50 - prev.happiness) * 0.01; // +1% за каждую единицу ниже 50
+            sickChance += (50 - prev.happiness) * 0.005;
           }
 
           // Увеличиваем шанс при низком голоде (ниже 30)
           if (prev.hunger < 30) {
-            sickChance += (30 - prev.hunger) * 0.02; // +2% за каждую единицу ниже 30
+            sickChance += (30 - prev.hunger) * 0.01;
           }
 
           // Проверяем, заболела ли свинка
