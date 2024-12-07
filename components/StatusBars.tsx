@@ -23,7 +23,7 @@ export function StatusBars({
         styles.statusBars,
         {
           height,
-          paddingTop: insets.top + 16, // 16 - дополнительный отступ после статус бара
+          paddingTop: insets.top + 16,
         },
       ]}
     >
