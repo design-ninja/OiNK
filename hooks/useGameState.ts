@@ -6,9 +6,9 @@ import { Audio } from "expo-av";
 const SCREEN_WIDTH = Dimensions.get("window").width;
 const SCREEN_HEIGHT = Dimensions.get("window").height;
 
-const LAYOUT = {
+export const LAYOUT = {
   STATUS_BAR_HEIGHT: 200,
-  CONTROLS_HEIGHT: 100,
+  CONTROLS_HEIGHT: 120,
   PIG_SAFE_PADDING: 50,
 } as const;
 

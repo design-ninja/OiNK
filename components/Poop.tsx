@@ -1,4 +1,4 @@
-import { Text, StyleSheet, Pressable, Animated } from "react-native";
+import { StyleSheet, Pressable, Animated } from "react-native";
 import { useRef, useCallback } from "react";
 
 interface PoopProps {
