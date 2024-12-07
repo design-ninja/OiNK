@@ -5,8 +5,6 @@ interface ControlsProps {
   onFeed: () => void;
   onPlay: () => void;
   onHeal?: () => void;
-  onTogglePause: () => void;
-  isPaused: boolean;
   isSick: boolean;
   height: number;
 }
@@ -15,7 +13,6 @@ export function Controls({
   onFeed,
   onPlay,
   onHeal,
-  isPaused,
   isSick,
   height,
 }: ControlsProps) {
@@ -24,8 +21,6 @@ export function Controls({
   const healScale = useRef(new Animated.Value(1)).current;
 
   const handlePress = (action: () => void, scale: Animated.Value) => {
-    if (isPaused) return;
-
     action();
 
     Animated.sequence([
@@ -46,9 +41,8 @@ export function Controls({
     <View style={[styles.controls, { height }]}>
       <Animated.View style={{ transform: [{ scale: feedScale }] }}>
         <Pressable
-          style={[styles.button, isPaused && styles.buttonDisabled]}
+          style={styles.button}
           onPress={() => handlePress(onFeed, feedScale)}
-          disabled={isPaused}
         >
           <Text style={styles.buttonText}>🍎</Text>
         </Pressable>
@@ -56,9 +50,8 @@ export function Controls({
 
       <Animated.View style={{ transform: [{ scale: playScale }] }}>
         <Pressable
-          style={[styles.button, isPaused && styles.buttonDisabled]}
+          style={styles.button}
           onPress={() => handlePress(onPlay, playScale)}
-          disabled={isPaused}
         >
           <Text style={styles.buttonText}>⚽</Text>
         </Pressable>
@@ -67,9 +60,8 @@ export function Controls({
       {isSick && (
         <Animated.View style={{ transform: [{ scale: healScale }] }}>
           <Pressable
-            style={[styles.button, isPaused && styles.buttonDisabled]}
+            style={styles.button}
             onPress={() => handlePress(onHeal!, healScale)}
-            disabled={isPaused}
           >
             <Text style={styles.buttonText}>💊</Text>
           </Pressable>

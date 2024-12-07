@@ -13,7 +13,6 @@ const SCREEN_HEIGHT = Dimensions.get("window").height;
 
 interface PigProps {
   isSick: boolean;
-  isPaused: boolean;
   statusBarHeight: number;
   controlsHeight: number;
   safePadding: number;
@@ -22,7 +21,6 @@ interface PigProps {
 
 export function Pig({
   isSick,
-  isPaused,
   statusBarHeight,
   controlsHeight,
   safePadding,
@@ -63,8 +61,6 @@ export function Pig({
   }, [age, playSound]);
 
   const handlePress = () => {
-    if (isPaused) return;
-
     playSound("play");
 
     Animated.sequence([
@@ -82,8 +78,6 @@ export function Pig({
   };
 
   const movePig = () => {
-    if (isPaused) return;
-
     const PIG_SIZE = 100;
 
     const minX = safePadding;
@@ -111,7 +105,7 @@ export function Pig({
   useEffect(() => {
     const moveInterval = setInterval(movePig, 2500);
     return () => clearInterval(moveInterval);
-  }, [isPaused]);
+  }, []);
 
   useEffect(() => {
     console.log("Current pig age:", age);

@@ -23,11 +23,9 @@ export default function HomeScreen() {
   const [currentAction, setCurrentAction] = useState<string | null>(null);
 
   const handleAction = (action: () => void, emoji: string) => {
-    if (!state.isPaused) {
-      action();
-      setCurrentAction(emoji);
-      setTimeout(() => setCurrentAction(null), 400);
-    }
+    action();
+    setCurrentAction(emoji);
+    setTimeout(() => setCurrentAction(null), 400);
   };
 
   if (state.isGameOver) {
@@ -71,7 +69,6 @@ export default function HomeScreen() {
 
       <Pig
         isSick={state.isSick}
-        isPaused={state.isPaused}
         statusBarHeight={LAYOUT.STATUS_BAR_HEIGHT}
         controlsHeight={LAYOUT.CONTROLS_HEIGHT}
         safePadding={LAYOUT.PIG_SAFE_PADDING}
@@ -88,8 +85,6 @@ export default function HomeScreen() {
         onFeed={() => handleAction(actions.feed, "🍎")}
         onPlay={() => handleAction(actions.play, "⚽")}
         onHeal={() => handleAction(actions.heal, "💊")}
-        onTogglePause={actions.togglePause}
-        isPaused={state.isPaused}
         isSick={state.isSick}
       />
     </View>

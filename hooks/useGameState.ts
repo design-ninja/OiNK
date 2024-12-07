@@ -39,7 +39,6 @@ interface GameState {
   hasWon: boolean;
   poops: Array<{ x: number; y: number; id: number }>;
   causeOfDeath?: string;
-  isPaused: boolean;
   backgroundSound: Audio.Sound | null;
 }
 
@@ -54,7 +53,6 @@ export function useGameState() {
     isGameOver: false,
     hasWon: false,
     poops: [],
-    isPaused: false,
     backgroundSound: null,
   });
 
@@ -68,21 +66,11 @@ export function useGameState() {
       isGameOver: false,
       hasWon: false,
       poops: [],
-      isPaused: false,
       backgroundSound: null,
     });
   }, []);
 
-  const togglePause = useCallback(async () => {
-    setState((prev) => {
-      const newPaused = !prev.isPaused;
-      return { ...prev, isPaused: newPaused };
-    });
-  }, []);
-
   const decreaseStats = useCallback(() => {
-    if (state.isPaused) return;
-
     setState((prev) => {
       const decreaseRate = prev.isSick
         ? GAME_CONFIG.STAT_DECREASE.SICK
@@ -123,7 +111,7 @@ export function useGameState() {
         cleanliness: newCleanliness,
       };
     });
-  }, [state.isPaused]);
+  }, []);
 
   const addPoop = useCallback(() => {
     playSound("poop");
@@ -220,7 +208,7 @@ export function useGameState() {
 
   useEffect(() => {
     const gameInterval = setInterval(() => {
-      if (!state.isGameOver && !state.hasWon && !state.isPaused) {
+      if (!state.isGameOver && !state.hasWon) {
         decreaseStats();
 
         setState((prev) => {
@@ -266,14 +254,7 @@ export function useGameState() {
     }, GAME_CONFIG.TICK_RATE);
 
     return () => clearInterval(gameInterval);
-  }, [
-    state.isGameOver,
-    state.hasWon,
-    state.isPaused,
-    decreaseStats,
-    addPoop,
-    playSound,
-  ]);
+  }, [state.isGameOver, state.hasWon, decreaseStats, addPoop, playSound]);
 
   useEffect(() => {
     if (state.isGameOver) {
@@ -284,14 +265,12 @@ export function useGameState() {
   }, [state.isGameOver, state.hasWon, playSound]);
 
   useEffect(() => {
-    if (state.isPaused) return;
-
     const interval = setInterval(() => {
       setState((prev) => ({ ...prev, age: prev.age + 1 }));
     }, 1000);
 
     return () => clearInterval(interval);
-  }, [state.isPaused]);
+  }, []);
 
   useEffect(() => {
     const loadSound = async () => {
@@ -319,7 +298,6 @@ export function useGameState() {
       play,
       heal,
       cleanPoop,
-      togglePause,
       reset,
     },
   };
