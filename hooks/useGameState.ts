@@ -130,8 +130,17 @@ export function useGameState() {
     setState((prev) => {
       const newPoop = {
         id: Date.now(),
-        x: Math.random() * (SCREEN_WIDTH - 100) + 50,
-        y: Math.random() * (SCREEN_HEIGHT - 200) + 100,
+        x:
+          Math.random() * (SCREEN_WIDTH - LAYOUT.PIG_SAFE_PADDING * 2) +
+          LAYOUT.PIG_SAFE_PADDING,
+        y:
+          Math.random() *
+            (SCREEN_HEIGHT -
+              LAYOUT.STATUS_BAR_HEIGHT -
+              LAYOUT.CONTROLS_HEIGHT -
+              LAYOUT.PIG_SAFE_PADDING * 2) +
+          LAYOUT.STATUS_BAR_HEIGHT +
+          LAYOUT.PIG_SAFE_PADDING,
       };
 
       // Мгновенное уменьшение чистоты при появлении какашки

@@ -69,6 +69,7 @@ const styles = StyleSheet.create({
     flex: 1,
     height: 12,
     backgroundColor: "rgba(0, 0, 0, 0.2)",
+    shadowColor: "rgba(0, 0, 0, 0.6)",
     borderRadius: 6,
     overflow: "hidden",
   },
