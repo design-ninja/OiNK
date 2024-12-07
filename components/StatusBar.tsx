@@ -1,6 +1,11 @@
 import { Typography } from "@/constants/Typography";
-import { useRef, useEffect } from "react";
-import { View, Text, StyleSheet, Animated, Easing } from "react-native";
+import { useEffect } from "react";
+import { View, Text, StyleSheet } from "react-native";
+import Animated, {
+  useAnimatedStyle,
+  useSharedValue,
+  withSpring,
+} from "react-native-reanimated";
 
 const LABEL_EMOJIS = {
   Hunger: "🍎",
@@ -21,16 +26,21 @@ export function StatusBar({ label, value, color }: StatusBarProps) {
   const displayValue = isAge ? Math.floor(value) : Math.round(value);
   const percentage = isAge ? (value / 100) * 100 : value;
 
-  const widthAnim = useRef(new Animated.Value(percentage)).current;
+  const width = useSharedValue(percentage);
 
   useEffect(() => {
-    Animated.timing(widthAnim, {
-      toValue: percentage,
-      duration: 1000,
-      useNativeDriver: false,
-      easing: Easing.linear,
-    }).start();
+    width.value = withSpring(percentage, {
+      damping: 15,
+      stiffness: 100,
+      mass: 0.5,
+    });
   }, [percentage]);
+
+  const animatedStyle = useAnimatedStyle(() => {
+    return {
+      width: `${width.value}%`,
+    };
+  });
 
   return (
     <View style={styles.statusBarContainer}>
@@ -39,13 +49,8 @@ export function StatusBar({ label, value, color }: StatusBarProps) {
         <Animated.View
           style={[
             styles.statusBarFill,
-            {
-              backgroundColor: color,
-              width: widthAnim.interpolate({
-                inputRange: [0, 100],
-                outputRange: ["0%", "100%"],
-              }),
-            },
+            { backgroundColor: color },
+            animatedStyle,
           ]}
         />
       </View>
