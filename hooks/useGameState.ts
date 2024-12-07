@@ -108,10 +108,10 @@ export function useGameState() {
         return { ...prev, isGameOver: true, causeOfDeath: "hunger" };
       }
       if (newHappiness === GAME_CONFIG.MIN_STAT_VALUE) {
-        return { ...prev, isGameOver: true, causeOfDeath: "sadness" };
+        return { ...prev, isGameOver: true, causeOfDeath: "happiness" };
       }
       if (newCleanliness === GAME_CONFIG.MIN_STAT_VALUE) {
-        return { ...prev, isGameOver: true, causeOfDeath: "dirt" };
+        return { ...prev, isGameOver: true, causeOfDeath: "cleanliness" };
       }
 
       return {
