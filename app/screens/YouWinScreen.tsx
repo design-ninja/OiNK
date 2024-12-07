@@ -1,3 +1,4 @@
+import { Typography } from "@/constants/Typography";
 import { useRef, useEffect } from "react";
 import { View, Text, Pressable, StyleSheet, Animated } from "react-native";
 
@@ -43,14 +44,13 @@ const styles = StyleSheet.create({
     position: "absolute",
   },
   gameOverTitle: {
-    fontFamily: "PlusJakartaSans",
+    ...Typography.defaultFontFamily.bold,
     color: "white",
     fontSize: 48,
-    fontWeight: "800",
     marginTop: 120,
   },
   resetButton: {
-    fontFamily: "PlusJakartaSans",
+    ...Typography.defaultFontFamily.semiBold,
     backgroundColor: "#22c55e",
     paddingHorizontal: 48,
     paddingVertical: 24,

@@ -1,3 +1,4 @@
+import { Typography } from "@/constants/Typography";
 import { useRef, useEffect } from "react";
 import { View, Text, StyleSheet, Animated, Easing } from "react-native";
 
@@ -77,9 +78,8 @@ const styles = StyleSheet.create({
     height: "100%",
   },
   statusValue: {
-    fontFamily: "PlusJakartaSans",
+    ...Typography.defaultFontFamily.semiBold,
     fontSize: 16,
-    fontWeight: "bold",
     color: "white",
     textShadowColor: "rgba(0, 0, 0, 0.3)",
     textShadowOffset: { width: 1, height: 1 },
