@@ -1,4 +1,5 @@
-import { View, Pressable, Text, StyleSheet } from "react-native";
+import { View, Pressable, Text, StyleSheet, Animated } from "react-native";
+import { useRef } from "react";
 
 interface ControlsProps {
   onFeed: () => void;
@@ -18,36 +19,61 @@ export function Controls({
   isSick,
   height,
 }: ControlsProps) {
-  const handleAction = (action: () => void, emoji: string) => {
-    if (!isPaused) {
-      action();
-    }
+  const feedScale = useRef(new Animated.Value(1)).current;
+  const playScale = useRef(new Animated.Value(1)).current;
+  const healScale = useRef(new Animated.Value(1)).current;
+
+  const handlePress = (action: () => void, scale: Animated.Value) => {
+    if (isPaused) return;
+
+    action();
+
+    Animated.sequence([
+      Animated.timing(scale, {
+        toValue: 1.2,
+        duration: 100,
+        useNativeDriver: true,
+      }),
+      Animated.timing(scale, {
+        toValue: 1,
+        duration: 100,
+        useNativeDriver: true,
+      }),
+    ]).start();
   };
 
   return (
     <View style={[styles.controls, { height }]}>
-      <Pressable
-        style={[styles.button, isPaused && styles.buttonDisabled]}
-        onPress={() => handleAction(onFeed, "🍎")}
-        disabled={isPaused}
-      >
-        <Text style={styles.buttonText}>🍎</Text>
-      </Pressable>
-      <Pressable
-        style={[styles.button, isPaused && styles.buttonDisabled]}
-        onPress={() => handleAction(onPlay, "⚽")}
-        disabled={isPaused}
-      >
-        <Text style={styles.buttonText}>⚽</Text>
-      </Pressable>
-      {isSick && (
+      <Animated.View style={{ transform: [{ scale: feedScale }] }}>
         <Pressable
           style={[styles.button, isPaused && styles.buttonDisabled]}
-          onPress={() => handleAction(onHeal!, "💊")}
+          onPress={() => handlePress(onFeed, feedScale)}
           disabled={isPaused}
         >
-          <Text style={styles.buttonText}>💊</Text>
+          <Text style={styles.buttonText}>🍎</Text>
         </Pressable>
+      </Animated.View>
+
+      <Animated.View style={{ transform: [{ scale: playScale }] }}>
+        <Pressable
+          style={[styles.button, isPaused && styles.buttonDisabled]}
+          onPress={() => handlePress(onPlay, playScale)}
+          disabled={isPaused}
+        >
+          <Text style={styles.buttonText}>⚽</Text>
+        </Pressable>
+      </Animated.View>
+
+      {isSick && (
+        <Animated.View style={{ transform: [{ scale: healScale }] }}>
+          <Pressable
+            style={[styles.button, isPaused && styles.buttonDisabled]}
+            onPress={() => handlePress(onHeal!, healScale)}
+            disabled={isPaused}
+          >
+            <Text style={styles.buttonText}>💊</Text>
+          </Pressable>
+        </Animated.View>
       )}
     </View>
   );
@@ -72,7 +98,6 @@ const styles = StyleSheet.create({
     borderRadius: 40,
     justifyContent: "center",
     alignItems: "center",
-    transform: [{ scale: 1 }],
   },
   buttonDisabled: {
     opacity: 0.5,
