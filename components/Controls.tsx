@@ -1,5 +1,10 @@
-import { View, Pressable, Text, StyleSheet, Animated } from "react-native";
-import { useRef } from "react";
+import { View, Pressable, Text, StyleSheet } from "react-native";
+import Animated, {
+  useSharedValue,
+  useAnimatedStyle,
+  withSequence,
+  withTiming,
+} from "react-native-reanimated";
 
 interface ControlsProps {
   onFeed: () => void;
@@ -16,30 +21,36 @@ export function Controls({
   isSick,
   height,
 }: ControlsProps) {
-  const feedScale = useRef(new Animated.Value(1)).current;
-  const playScale = useRef(new Animated.Value(1)).current;
-  const healScale = useRef(new Animated.Value(1)).current;
+  const feedScale = useSharedValue(1);
+  const playScale = useSharedValue(1);
+  const healScale = useSharedValue(1);
 
-  const handlePress = (action: () => void, scale: Animated.Value) => {
+  const handlePress = (
+    action: () => void,
+    scale: Animated.SharedValue<number>
+  ) => {
     action();
-
-    Animated.sequence([
-      Animated.timing(scale, {
-        toValue: 1.2,
-        duration: 100,
-        useNativeDriver: true,
-      }),
-      Animated.timing(scale, {
-        toValue: 1,
-        duration: 100,
-        useNativeDriver: true,
-      }),
-    ]).start();
+    scale.value = withSequence(
+      withTiming(1.2, { duration: 100 }),
+      withTiming(1, { duration: 100 })
+    );
   };
+
+  const feedAnimatedStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: feedScale.value }],
+  }));
+
+  const playAnimatedStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: playScale.value }],
+  }));
+
+  const healAnimatedStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: healScale.value }],
+  }));
 
   return (
     <View style={[styles.controls, { height }]}>
-      <Animated.View style={{ transform: [{ scale: feedScale }] }}>
+      <Animated.View style={feedAnimatedStyle}>
         <Pressable
           style={styles.button}
           onPress={() => handlePress(onFeed, feedScale)}
@@ -48,7 +59,7 @@ export function Controls({
         </Pressable>
       </Animated.View>
 
-      <Animated.View style={{ transform: [{ scale: playScale }] }}>
+      <Animated.View style={playAnimatedStyle}>
         <Pressable
           style={styles.button}
           onPress={() => handlePress(onPlay, playScale)}
@@ -58,7 +69,7 @@ export function Controls({
       </Animated.View>
 
       {isSick && (
-        <Animated.View style={{ transform: [{ scale: healScale }] }}>
+        <Animated.View style={healAnimatedStyle}>
           <Pressable
             style={styles.button}
             onPress={() => handlePress(onHeal!, healScale)}

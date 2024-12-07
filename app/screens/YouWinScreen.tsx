@@ -1,30 +1,40 @@
 import { Typography } from "@/constants/Typography";
-import { useRef, useEffect } from "react";
-import { View, Text, Pressable, StyleSheet, Animated } from "react-native";
+import { useEffect } from "react";
+import { View, Text, Pressable, StyleSheet } from "react-native";
+import Animated, {
+  useAnimatedStyle,
+  useSharedValue,
+  withSpring,
+} from "react-native-reanimated";
 
 interface YouWinScreenProps {
   onReset: () => void;
 }
 
 export function YouWinScreen({ onReset }: YouWinScreenProps) {
-  const scaleAnim = useRef(new Animated.Value(0)).current;
+  const scale = useSharedValue(0);
 
   useEffect(() => {
-    Animated.spring(scaleAnim, {
-      toValue: 1,
-      useNativeDriver: true,
-    }).start();
+    scale.value = withSpring(1);
   }, []);
+
+  const animatedStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: scale.value }],
+  }));
 
   return (
     <View style={styles.overlay}>
-      <Animated.Text
-        style={[styles.gameOverEmoji, { transform: [{ scale: scaleAnim }] }]}
-      >
+      <Animated.Text style={[styles.gameOverEmoji, animatedStyle]}>
         🎉
       </Animated.Text>
       <Text style={styles.gameOverTitle}>You Win!</Text>
-      <Pressable style={styles.resetButton} onPress={onReset}>
+      <Pressable
+        style={({ pressed }) => [
+          styles.resetButton,
+          { transform: [{ scale: pressed ? 0.95 : 1 }] },
+        ]}
+        onPress={onReset}
+      >
         <Text style={styles.resetButtonText}>Play Again</Text>
       </Pressable>
     </View>

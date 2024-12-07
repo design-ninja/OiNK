@@ -1,5 +1,12 @@
-import { StyleSheet, Pressable, Animated } from "react-native";
-import { useRef, useCallback } from "react";
+import { StyleSheet, Pressable } from "react-native";
+import { useCallback } from "react";
+import Animated, {
+  useSharedValue,
+  useAnimatedStyle,
+  withSequence,
+  withTiming,
+  runOnJS,
+} from "react-native-reanimated";
 
 interface PoopProps {
   x: number;
@@ -9,17 +16,26 @@ interface PoopProps {
 }
 
 export function Poop({ x, y, id, onPress }: PoopProps) {
-  const opacity = useRef(new Animated.Value(1)).current;
+  const opacity = useSharedValue(1);
+  const scale = useSharedValue(1);
 
   const handlePress = useCallback(() => {
-    Animated.timing(opacity, {
-      toValue: 0,
-      duration: 200,
-      useNativeDriver: true,
-    }).start(() => {
-      onPress(id);
+    scale.value = withSequence(
+      withTiming(1.3, { duration: 150 }),
+      withTiming(1, { duration: 100 })
+    );
+
+    opacity.value = withTiming(0, { duration: 200 }, (finished) => {
+      if (finished) {
+        runOnJS(onPress)(id);
+      }
     });
   }, [id, onPress]);
+
+  const animatedStyle = useAnimatedStyle(() => ({
+    opacity: opacity.value,
+    transform: [{ scale: scale.value }],
+  }));
 
   return (
     <Pressable
@@ -27,7 +43,9 @@ export function Poop({ x, y, id, onPress }: PoopProps) {
       onPress={handlePress}
       hitSlop={10}
     >
-      <Animated.Text style={[styles.poopEmoji, { opacity }]}>💩</Animated.Text>
+      <Animated.Text style={[styles.poopEmoji, animatedStyle]}>
+        💩
+      </Animated.Text>
     </Pressable>
   );
 }

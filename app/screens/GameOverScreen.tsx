@@ -1,6 +1,11 @@
 import { Typography } from "@/constants/Typography";
-import { useRef, useEffect } from "react";
-import { View, Text, Pressable, StyleSheet, Animated } from "react-native";
+import { useEffect } from "react";
+import { View, Text, Pressable, StyleSheet } from "react-native";
+import Animated, {
+  useAnimatedStyle,
+  useSharedValue,
+  withSpring,
+} from "react-native-reanimated";
 
 const DEATH_MESSAGES = {
   hunger: { emoji: "🍽️", message: "🐷 died from hunger..." },
@@ -14,14 +19,15 @@ interface GameOverScreenProps {
 }
 
 export function GameOverScreen({ causeOfDeath, onReset }: GameOverScreenProps) {
-  const scaleAnim = useRef(new Animated.Value(0)).current;
+  const scale = useSharedValue(0);
 
   useEffect(() => {
-    Animated.spring(scaleAnim, {
-      toValue: 1,
-      useNativeDriver: true,
-    }).start();
+    scale.value = withSpring(1);
   }, []);
+
+  const animatedStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: scale.value }],
+  }));
 
   const deathInfo =
     causeOfDeath && causeOfDeath in DEATH_MESSAGES
@@ -30,14 +36,18 @@ export function GameOverScreen({ causeOfDeath, onReset }: GameOverScreenProps) {
 
   return (
     <View style={styles.overlay}>
-      <Animated.Text
-        style={[styles.gameOverEmoji, { transform: [{ scale: scaleAnim }] }]}
-      >
+      <Animated.Text style={[styles.gameOverEmoji, animatedStyle]}>
         {deathInfo.emoji}
       </Animated.Text>
       <Text style={styles.gameOverTitle}>Game Over</Text>
       <Text style={styles.gameOverMessage}>{deathInfo.message}</Text>
-      <Pressable style={styles.resetButton} onPress={onReset}>
+      <Pressable
+        style={({ pressed }) => [
+          styles.resetButton,
+          { transform: [{ scale: pressed ? 0.95 : 1 }] },
+        ]}
+        onPress={onReset}
+      >
         <Text style={styles.resetButtonText}>Start Again</Text>
       </Pressable>
     </View>
@@ -75,7 +85,6 @@ const styles = StyleSheet.create({
     borderRadius: 9999,
     marginTop: "auto",
     marginBottom: 64,
-    transform: [{ scale: 1 }],
   },
   resetButtonText: {
     ...Typography.defaultFontFamily.semiBold,
