@@ -1,11 +1,12 @@
 import { useEffect, useRef } from "react";
-import {
-  Text,
-  StyleSheet,
-  Animated,
-  Dimensions,
-  Pressable,
-} from "react-native";
+import { Text, StyleSheet, Dimensions, Pressable } from "react-native";
+import Animated, {
+  useAnimatedStyle,
+  useSharedValue,
+  withSpring,
+  withSequence,
+  withTiming,
+} from "react-native-reanimated";
 import { useGameSounds } from "@/hooks/useGameSounds";
 
 const SCREEN_WIDTH = Dimensions.get("window").width;
@@ -26,10 +27,9 @@ export function Pig({
   safePadding,
   age,
 }: PigProps) {
-  const position = useRef(
-    new Animated.ValueXY({ x: SCREEN_WIDTH / 2, y: SCREEN_HEIGHT / 2 })
-  ).current;
-  const scale = useRef(new Animated.Value(1)).current;
+  const positionX = useSharedValue(SCREEN_WIDTH / 2);
+  const positionY = useSharedValue(SCREEN_HEIGHT / 2);
+  const scale = useSharedValue(1);
   const { playSound } = useGameSounds();
   const previousAge = useRef(age);
 
@@ -41,20 +41,10 @@ export function Pig({
 
     if (hasReachedMilestone) {
       playSound("birthday");
-
-      // Добавим анимацию празднования
-      Animated.sequence([
-        Animated.timing(scale, {
-          toValue: 1.3,
-          duration: 200,
-          useNativeDriver: true,
-        }),
-        Animated.timing(scale, {
-          toValue: 1,
-          duration: 200,
-          useNativeDriver: true,
-        }),
-      ]).start();
+      scale.value = withSequence(
+        withTiming(1.3, { duration: 200 }),
+        withTiming(1, { duration: 200 })
+      );
     }
 
     previousAge.current = age;
@@ -62,19 +52,10 @@ export function Pig({
 
   const handlePress = () => {
     playSound("play");
-
-    Animated.sequence([
-      Animated.timing(scale, {
-        toValue: 1.2,
-        duration: 100,
-        useNativeDriver: true,
-      }),
-      Animated.timing(scale, {
-        toValue: 1,
-        duration: 100,
-        useNativeDriver: true,
-      }),
-    ]).start();
+    scale.value = withSequence(
+      withTiming(1.2, { duration: 100 }),
+      withTiming(1, { duration: 100 })
+    );
   };
 
   const movePig = () => {
@@ -94,12 +75,8 @@ export function Pig({
       Math.max(minY, Math.random() * (maxY - minY) + minY)
     );
 
-    Animated.spring(position, {
-      toValue: { x: newX, y: newY },
-      useNativeDriver: false,
-      bounciness: 4,
-      speed: 8,
-    }).start();
+    positionX.value = withSpring(newX, { damping: 10, stiffness: 100 });
+    positionY.value = withSpring(newY, { damping: 10, stiffness: 100 });
   };
 
   useEffect(() => {
@@ -121,13 +98,20 @@ export function Pig({
     return require("../assets/images/piggy0.png");
   };
 
+  const animatedStyle = useAnimatedStyle(() => {
+    return {
+      transform: [
+        { translateX: positionX.value },
+        { translateY: positionY.value },
+        { scale: scale.value },
+      ],
+    };
+  });
+
   return (
-    <Animated.View style={[styles.pig, position.getLayout()]}>
+    <Animated.View style={[styles.pig, animatedStyle]}>
       <Pressable onPress={handlePress}>
-        <Animated.Image
-          source={getPigImage()}
-          style={[styles.pigImage, { transform: [{ scale }] }]}
-        />
+        <Animated.Image source={getPigImage()} style={styles.pigImage} />
         {isSick && <Text style={styles.sickEmoji}>🤮</Text>}
       </Pressable>
     </Animated.View>
