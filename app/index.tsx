@@ -57,7 +57,6 @@ export default function HomeScreen() {
         hunger={state.hunger}
         happiness={state.happiness}
         cleanliness={state.cleanliness}
-        age={state.age}
       />
 
       {state.poops.map((poop) => (
