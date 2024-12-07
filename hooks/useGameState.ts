@@ -13,7 +13,7 @@ export const LAYOUT = {
 } as const;
 
 const GAME_CONFIG = {
-  TICK_RATE: 1800,
+  TICK_RATE: 3000,
   POOP_CHANCE: 0.12,
   SICK_CHANCE: 0.08,
   MAX_STAT_VALUE: 100,
@@ -221,23 +221,17 @@ export function useGameState() {
 
         // Модифицированный шанс заболеть
         setState((prev) => {
-          // Базовый шанс заболевания
           let sickChance = GAME_CONFIG.SICK_CHANCE;
-
-          // Увеличиваем шанс на 5% за каждую какашку
           sickChance += prev.poops.length * 0.05;
 
-          // Увеличиваем шанс при низкой радости (ниже 50)
           if (prev.happiness < 50) {
             sickChance += (50 - prev.happiness) * 0.005;
           }
 
-          // Увеличиваем шанс при низком голоде (ниже 30)
           if (prev.hunger < 30) {
             sickChance += (30 - prev.hunger) * 0.01;
           }
 
-          // Проверяем, заболела ли свинка
           if (!prev.isSick && Math.random() < sickChance) {
             playSound("sick");
             return { ...prev, isSick: true };
@@ -246,10 +240,34 @@ export function useGameState() {
           return prev;
         });
 
-        // Шанс покакать
-        if (Math.random() < GAME_CONFIG.POOP_CHANCE) {
-          addPoop();
-        }
+        // Автоматическое добавление какашек
+        setState((prev) => {
+          let poopChance = GAME_CONFIG.POOP_CHANCE;
+
+          // Увеличиваем шанс при низкой сытости
+          if (prev.hunger < 50) {
+            poopChance *= 1.5;
+          }
+
+          // Увеличиваем шанс с возрастом
+          if (prev.age >= 50) {
+            poopChance *= 1.5;
+          } else if (prev.age >= 25) {
+            poopChance *= 1.2;
+          }
+
+          // Добавляем какашку только если сытость не максимальная
+          if (
+            Math.random() < poopChance &&
+            prev.hunger < GAME_CONFIG.MAX_STAT_VALUE
+          ) {
+            setTimeout(() => {
+              addPoop();
+            }, Math.random() * 1000);
+          }
+
+          return prev;
+        });
       }
     }, GAME_CONFIG.TICK_RATE);
 
