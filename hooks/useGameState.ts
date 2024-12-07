@@ -131,7 +131,7 @@ export function useGameState() {
           LAYOUT.PIG_SAFE_PADDING,
       };
 
-      // Мгновенное уменьшение чистоты при появлении какашки
+      // Descrease cleanliness when a poop is added
       const newCleanliness = Math.max(
         GAME_CONFIG.MIN_STAT_VALUE,
         prev.cleanliness - 10
@@ -219,7 +219,7 @@ export function useGameState() {
           return { ...prev, age: newAge };
         });
 
-        // Модифицированный шанс заболеть
+        // Modified sick chance
         setState((prev) => {
           let sickChance = GAME_CONFIG.SICK_CHANCE;
           sickChance += prev.poops.length * 0.05;
@@ -240,23 +240,23 @@ export function useGameState() {
           return prev;
         });
 
-        // Автоматическое добавление какашек
+        // Automatic poop addition
         setState((prev) => {
           let poopChance = GAME_CONFIG.POOP_CHANCE;
 
-          // Увеличиваем шанс при низкой сытости
+          // Increase chance when hunger is low
           if (prev.hunger < 50) {
             poopChance *= 1.5;
           }
 
-          // Увеличиваем шанс с возрастом
+          // Increase chance with age
           if (prev.age >= 50) {
             poopChance *= 1.5;
           } else if (prev.age >= 25) {
             poopChance *= 1.2;
           }
 
-          // Добавляем какашку только если сытость не максимальная
+          // Add poop only if hunger is not at max
           if (
             Math.random() < poopChance &&
             prev.hunger < GAME_CONFIG.MAX_STAT_VALUE

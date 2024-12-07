@@ -57,7 +57,7 @@ export function GameOverScreen({ causeOfDeath, onReset }: GameOverScreenProps) {
 const styles = StyleSheet.create({
   overlay: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: "rgba(0, 0, 0, 1)",
+    backgroundColor: "black",
     justifyContent: "center",
     alignItems: "center",
     zIndex: 50,
