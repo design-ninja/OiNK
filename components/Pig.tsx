@@ -59,7 +59,7 @@ export function Pig({
   };
 
   const movePig = () => {
-    const PIG_SIZE = 100;
+    const PIG_SIZE = 150;
 
     const minX = safePadding;
     const maxX = SCREEN_WIDTH - safePadding - PIG_SIZE;
@@ -123,15 +123,15 @@ const styles = StyleSheet.create({
     position: "absolute",
   },
   pigImage: {
-    width: 100,
-    height: 100,
+    width: 150,
+    height: 150,
     resizeMode: "contain",
   },
   sickEmoji: {
-    fontSize: 40,
+    fontSize: 64,
     position: "absolute",
-    bottom: 0,
+    bottom: 8,
     alignSelf: "center",
-    right: 31,
+    right: 42,
   },
 });
