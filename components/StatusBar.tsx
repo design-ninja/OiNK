@@ -74,7 +74,7 @@ const styles = StyleSheet.create({
   statusBarTrack: {
     flex: 1,
     height: 12,
-    backgroundColor: "rgba(0, 0, 0, 0.2)",
+    backgroundColor: "rgba(0, 0, 0, 0.15)",
     shadowColor: "rgba(0, 0, 0, 0.6)",
     borderRadius: 6,
     overflow: "hidden",

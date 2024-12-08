@@ -38,7 +38,7 @@ export default function HomeScreen() {
     <View style={styles.container}>
       <View style={styles.backgroundPattern}>
         <Image
-          source={require("@/assets/images/grass.png")}
+          source={require("@/assets/images/bg.png")}
           style={styles.grassBackground}
         />
       </View>

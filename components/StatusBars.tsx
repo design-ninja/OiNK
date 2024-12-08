@@ -28,8 +28,8 @@ export function StatusBars({
       ]}
     >
       <StatusBar label="Hunger" value={hunger} color="#FF6B6B" />
-      <StatusBar label="Happiness" value={happiness} color="#4ECDC4" />
-      <StatusBar label="Cleanliness" value={cleanliness} color="#45B7D1" />
+      <StatusBar label="Happiness" value={happiness} color="#02ce68" />
+      <StatusBar label="Cleanliness" value={cleanliness} color="#1a8dec" />
     </View>
   );
 }

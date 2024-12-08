@@ -97,7 +97,7 @@ const styles = StyleSheet.create({
   button: {
     width: 80,
     height: 80,
-    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    backgroundColor: "rgba(0, 0, 0, 0.3)",
     borderRadius: 40,
     justifyContent: "center",
     alignItems: "center",
@@ -106,6 +106,6 @@ const styles = StyleSheet.create({
     opacity: 0.5,
   },
   buttonText: {
-    fontSize: 40,
+    fontSize: 48,
   },
 });
