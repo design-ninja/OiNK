@@ -1,5 +1,5 @@
 import { Typography } from "@/constants/Typography";
-import { useEffect } from "react";
+import { useEffect, memo } from "react";
 import { View, Text, StyleSheet } from "react-native";
 import Animated, {
   useAnimatedStyle,
@@ -18,45 +18,6 @@ interface StatusBarProps {
   label: keyof typeof LABEL_EMOJIS;
   value: number;
   color: string;
-}
-
-export function StatusBar({ label, value, color }: StatusBarProps) {
-  const isAge = label === "Age";
-  const emoji = LABEL_EMOJIS[label];
-  const displayValue = isAge ? Math.floor(value) : Math.round(value);
-  const percentage = isAge ? (value / 100) * 100 : value;
-
-  const width = useSharedValue(percentage);
-
-  useEffect(() => {
-    width.value = withSpring(percentage, {
-      damping: 15,
-      stiffness: 100,
-      mass: 0.5,
-    });
-  }, [percentage]);
-
-  const animatedStyle = useAnimatedStyle(() => {
-    return {
-      width: `${width.value}%`,
-    };
-  });
-
-  return (
-    <View style={styles.statusBarContainer}>
-      <Text style={styles.statusEmoji}>{emoji}</Text>
-      <View style={styles.statusBarTrack}>
-        <Animated.View
-          style={[
-            styles.statusBarFill,
-            { backgroundColor: color },
-            animatedStyle,
-          ]}
-        />
-      </View>
-      <Text style={styles.statusValue}>{displayValue}</Text>
-    </View>
-  );
 }
 
 const styles = StyleSheet.create({
@@ -92,4 +53,50 @@ const styles = StyleSheet.create({
     minWidth: 30,
     textAlign: "right",
   },
+});
+
+export const StatusBar = memo(function StatusBar({
+  label,
+  value,
+  color,
+}: StatusBarProps) {
+  const isAge = label === "Age";
+  const emoji = LABEL_EMOJIS[label];
+  const displayValue = isAge ? Math.floor(value) : Math.round(value);
+  const percentage = isAge ? (value / 100) * 100 : value;
+
+  const width = useSharedValue(percentage);
+
+  useEffect(() => {
+    if (width.value !== percentage) {
+      width.value = withSpring(percentage, {
+        damping: 15,
+        stiffness: 100,
+        mass: 0.5,
+      });
+    }
+  }, [percentage, width]);
+
+  const animatedStyle = useAnimatedStyle(
+    () => ({
+      width: `${width.value}%`,
+    }),
+    []
+  );
+
+  return (
+    <View style={styles.statusBarContainer}>
+      <Text style={styles.statusEmoji}>{emoji}</Text>
+      <View style={styles.statusBarTrack}>
+        <Animated.View
+          style={[
+            styles.statusBarFill,
+            { backgroundColor: color },
+            animatedStyle,
+          ]}
+        />
+      </View>
+      <Text style={styles.statusValue}>{displayValue}</Text>
+    </View>
+  );
 });
