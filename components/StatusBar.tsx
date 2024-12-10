@@ -1,21 +1,15 @@
 import { typography } from "@/config/typography";
 import { useEffect, memo } from "react";
 import { View, Text, StyleSheet } from "react-native";
+import { GAME_ASSETS } from "@/config/game";
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
   withSpring,
 } from "react-native-reanimated";
 
-const LABEL_EMOJIS = {
-  Hunger: "🍎",
-  Happiness: "😊",
-  Cleanliness: "🧽",
-  Age: "🎂",
-} as const;
-
 interface StatusBarProps {
-  label: keyof typeof LABEL_EMOJIS;
+  label: keyof typeof GAME_ASSETS.STATUS_ICONS;
   value: number;
   color: string;
 }
@@ -25,8 +19,8 @@ export const StatusBar = memo(function StatusBar({
   value,
   color,
 }: StatusBarProps) {
-  const isAge = label === "Age";
-  const emoji = LABEL_EMOJIS[label];
+  const isAge = label === "AGE";
+  const emoji = GAME_ASSETS.STATUS_ICONS[label];
   const displayValue = isAge ? Math.floor(value) : Math.round(value);
   const percentage = isAge ? (value / 100) * 100 : value;
 

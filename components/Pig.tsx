@@ -8,6 +8,7 @@ import Animated, {
   withTiming,
 } from "react-native-reanimated";
 import { useGameSounds } from "@/hooks/useGameSounds";
+import { GAME_CONFIG, GAME_ASSETS } from "@/config/game";
 
 const SCREEN_WIDTH = Dimensions.get("window").width;
 const SCREEN_HEIGHT = Dimensions.get("window").height;
@@ -20,19 +21,6 @@ interface PigProps {
   age: number;
   isDead: boolean;
 }
-
-// Move constants outside component
-const PIG_SIZE = 150;
-const AGE_MILESTONES = [10, 25, 50, 80] as const;
-
-// Memoize pig images mapping
-const PIG_IMAGES = {
-  0: require("../assets/images/piggy0.png"),
-  10: require("../assets/images/piggy10.png"),
-  25: require("../assets/images/piggy25.png"),
-  50: require("../assets/images/piggy50.png"),
-  80: require("../assets/images/piggy80.png"),
-} as const;
 
 export function Pig({
   isSick,
@@ -52,9 +40,9 @@ export function Pig({
   const boundaries = useMemo(
     () => ({
       minX: safePadding,
-      maxX: SCREEN_WIDTH - safePadding - PIG_SIZE,
+      maxX: SCREEN_WIDTH - safePadding - GAME_CONFIG.PIG_SIZE,
       minY: statusBarHeight + safePadding,
-      maxY: SCREEN_HEIGHT - controlsHeight - safePadding - PIG_SIZE,
+      maxY: SCREEN_HEIGHT - controlsHeight - safePadding - GAME_CONFIG.PIG_SIZE,
     }),
     [statusBarHeight, controlsHeight, safePadding]
   );
@@ -95,7 +83,7 @@ export function Pig({
 
   // Optimize age milestone effect
   useEffect(() => {
-    const hasReachedMilestone = AGE_MILESTONES.some(
+    const hasReachedMilestone = GAME_CONFIG.AGE_MILESTONES.some(
       (milestone) => age >= milestone && previousAge.current < milestone
     );
 
@@ -112,10 +100,13 @@ export function Pig({
 
   // Memoize pig image getter
   const getPigImage = useCallback(() => {
-    if (isDead) return "🪦";
+    if (isDead) return GAME_ASSETS.PIG_EMOJIS.DEAD;
 
-    const milestone = [...AGE_MILESTONES].reverse().find((m) => age >= m) ?? 0;
-    return PIG_IMAGES[milestone as keyof typeof PIG_IMAGES];
+    const milestone =
+      [...GAME_CONFIG.AGE_MILESTONES].reverse().find((m) => age >= m) ?? 0;
+    return GAME_ASSETS.PIG_IMAGES[
+      milestone as keyof typeof GAME_ASSETS.PIG_IMAGES
+    ];
   }, [age, isDead]);
 
   // Memoize animated style
@@ -130,10 +121,6 @@ export function Pig({
     []
   );
 
-  useEffect(() => {
-    console.log("🐷 Current age:", age);
-  }, [age]);
-
   return (
     <Animated.View style={[styles.pig, animatedStyle]}>
       <Pressable onPress={handlePress} disabled={isDead}>
@@ -146,7 +133,11 @@ export function Pig({
               style={styles.pigImage}
               resizeMode="contain"
             />
-            {isSick && <Text style={styles.sickEmoji}>🤮</Text>}
+            {isSick && (
+              <Text style={styles.sickEmoji}>
+                {GAME_ASSETS.PIG_EMOJIS.SICK}
+              </Text>
+            )}
           </>
         )}
       </Pressable>

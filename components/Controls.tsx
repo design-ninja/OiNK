@@ -1,5 +1,6 @@
 import { memo, useCallback } from "react";
 import { View, Pressable, Text, StyleSheet } from "react-native";
+import { GAME_ASSETS } from "@/config/game";
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -75,20 +76,20 @@ export const Controls = memo(
         <AnimatedButton
           onPress={handleFeedPress}
           scale={feedScale}
-          emoji="🍎"
+          emoji={GAME_ASSETS.CONTROLS.FEED}
         />
 
         <AnimatedButton
           onPress={handlePlayPress}
           scale={playScale}
-          emoji="⚽"
+          emoji={GAME_ASSETS.CONTROLS.PLAY}
         />
 
         {isSick && (
           <AnimatedButton
             onPress={handleHealPress}
             scale={healScale}
-            emoji="💊"
+            emoji={GAME_ASSETS.CONTROLS.HEAL}
           />
         )}
       </View>

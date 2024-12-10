@@ -1,18 +1,12 @@
 import { typography } from "@/config/typography";
 import { useEffect } from "react";
 import { View, Text, Pressable, StyleSheet } from "react-native";
+import { END_MESSAGES } from "@/config/game";
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
   withSpring,
 } from "react-native-reanimated";
-
-const END_MESSAGES = {
-  hunger: { emoji: "🍽️", message: "🐷 died from hunger..." },
-  happiness: { emoji: "😢", message: "🐷 died from sadness..." },
-  cleanliness: { emoji: "🦠", message: "🐷 died from disease..." },
-  win: { emoji: "🎉", message: "You raised a happy pig!" },
-} as const;
 
 interface GameEndScreenProps {
   type: "win" | "gameOver";
@@ -40,7 +34,7 @@ export default function GameEndScreen({
       ? END_MESSAGES.win
       : causeOfDeath && causeOfDeath in END_MESSAGES
       ? END_MESSAGES[causeOfDeath as keyof typeof END_MESSAGES]
-      : { emoji: "💀", message: "Game Over" };
+      : END_MESSAGES.gameOver;
 
   return (
     <View style={styles.overlay}>

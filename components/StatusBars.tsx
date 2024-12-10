@@ -34,9 +34,9 @@ export const StatusBars = memo(function StatusBars({
   const statusBars = useMemo(
     () => (
       <>
-        <StatusBar label="Hunger" value={hunger} color="#FF6B6B" />
-        <StatusBar label="Happiness" value={happiness} color="#02ce68" />
-        <StatusBar label="Cleanliness" value={cleanliness} color="#1a8dec" />
+        <StatusBar label="HUNGER" value={hunger} color="#FF6B6B" />
+        <StatusBar label="HAPPINESS" value={happiness} color="#02ce68" />
+        <StatusBar label="CLEANLINESS" value={cleanliness} color="#1a8dec" />
       </>
     ),
     [hunger, happiness, cleanliness]
