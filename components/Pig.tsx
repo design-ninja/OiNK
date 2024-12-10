@@ -20,6 +20,7 @@ interface PigProps {
   safePadding: number;
   age: number;
   isDead: boolean;
+  hasWon: boolean;
 }
 
 export function Pig({
@@ -29,6 +30,7 @@ export function Pig({
   safePadding,
   age,
   isDead,
+  hasWon,
 }: PigProps) {
   const positionX = useSharedValue(SCREEN_WIDTH / 2);
   const positionY = useSharedValue(SCREEN_HEIGHT / 2);
@@ -66,11 +68,11 @@ export function Pig({
 
   // Optimize movement interval
   useEffect(() => {
-    if (isDead) return;
+    if (isDead || hasWon) return;
 
     const moveInterval = setInterval(movePig, 2500);
     return () => clearInterval(moveInterval);
-  }, [isDead, movePig]);
+  }, [isDead, hasWon, movePig]);
 
   // Memoize press handler
   const handlePress = useCallback(() => {

@@ -57,9 +57,7 @@ export default function GameEndScreen({
           {type === "win" ? "Play Again" : "Start Again"}
         </Text>
       </Pressable>
-      {type === "gameOver" && (
-        <Text style={styles.message}>{endInfo.message}</Text>
-      )}
+      <Text style={styles.message}>{endInfo.message}</Text>
     </View>
   );
 }

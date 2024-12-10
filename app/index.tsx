@@ -78,6 +78,7 @@ export default function HomeScreen() {
         safePadding={LAYOUT.PIG_SAFE_PADDING}
         age={state.age}
         isDead={state.isGameOver}
+        hasWon={state.hasWon}
       />
 
       <ActionEffect
