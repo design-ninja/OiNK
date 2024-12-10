@@ -3,6 +3,7 @@
     "name": "OiNK",
     "slug": "OiNK",
     "version": "1.0.0",
+    "description": "OiNK is a tamagotchi-style game about a pig that needs to be taken care of.",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "oink",
