@@ -1,3 +1,4 @@
+import { memo, useCallback } from "react";
 import { View, Pressable, Text, StyleSheet } from "react-native";
 import Animated, {
   useSharedValue,
@@ -14,73 +15,86 @@ interface ControlsProps {
   height: number;
 }
 
-export function Controls({
-  onFeed,
-  onPlay,
-  onHeal,
-  isSick,
-  height,
-}: ControlsProps) {
-  const feedScale = useSharedValue(1);
-  const playScale = useSharedValue(1);
-  const healScale = useSharedValue(1);
+// Memoized button component to prevent unnecessary re-renders
+const AnimatedButton = memo(
+  ({
+    onPress,
+    scale,
+    emoji,
+  }: {
+    onPress: () => void;
+    scale: Animated.SharedValue<number>;
+    emoji: string;
+  }) => {
+    const animatedStyle = useAnimatedStyle(() => ({
+      transform: [{ scale: scale.value }],
+    }));
 
-  const handlePress = (
-    action: () => void,
-    scale: Animated.SharedValue<number>
-  ) => {
-    action();
-    scale.value = withSequence(
-      withTiming(1.2, { duration: 100 }),
-      withTiming(1, { duration: 100 })
+    return (
+      <Animated.View style={animatedStyle}>
+        <Pressable style={styles.button} onPress={onPress}>
+          <Text style={styles.buttonText}>{emoji}</Text>
+        </Pressable>
+      </Animated.View>
     );
-  };
+  }
+);
 
-  const feedAnimatedStyle = useAnimatedStyle(() => ({
-    transform: [{ scale: feedScale.value }],
-  }));
+export const Controls = memo(
+  ({ onFeed, onPlay, onHeal, isSick, height }: ControlsProps) => {
+    const feedScale = useSharedValue(1);
+    const playScale = useSharedValue(1);
+    const healScale = useSharedValue(1);
 
-  const playAnimatedStyle = useAnimatedStyle(() => ({
-    transform: [{ scale: playScale.value }],
-  }));
+    const handlePress = (
+      action: () => void,
+      scale: Animated.SharedValue<number>
+    ) => {
+      action();
+      scale.value = withSequence(
+        withTiming(1.2, { duration: 100 }),
+        withTiming(1, { duration: 100 })
+      );
+    };
 
-  const healAnimatedStyle = useAnimatedStyle(() => ({
-    transform: [{ scale: healScale.value }],
-  }));
+    // Memoize handlePress callbacks
+    const handleFeedPress = useCallback(() => {
+      handlePress(onFeed, feedScale);
+    }, [onFeed]);
 
-  return (
-    <View style={[styles.controls, { height }]}>
-      <Animated.View style={feedAnimatedStyle}>
-        <Pressable
-          style={styles.button}
-          onPress={() => handlePress(onFeed, feedScale)}
-        >
-          <Text style={styles.buttonText}>🍎</Text>
-        </Pressable>
-      </Animated.View>
+    const handlePlayPress = useCallback(() => {
+      handlePress(onPlay, playScale);
+    }, [onPlay]);
 
-      <Animated.View style={playAnimatedStyle}>
-        <Pressable
-          style={styles.button}
-          onPress={() => handlePress(onPlay, playScale)}
-        >
-          <Text style={styles.buttonText}>⚽</Text>
-        </Pressable>
-      </Animated.View>
+    const handleHealPress = useCallback(() => {
+      if (onHeal) handlePress(onHeal, healScale);
+    }, [onHeal]);
 
-      {isSick && (
-        <Animated.View style={healAnimatedStyle}>
-          <Pressable
-            style={styles.button}
-            onPress={() => handlePress(onHeal!, healScale)}
-          >
-            <Text style={styles.buttonText}>💊</Text>
-          </Pressable>
-        </Animated.View>
-      )}
-    </View>
-  );
-}
+    return (
+      <View style={[styles.controls, { height }]}>
+        <AnimatedButton
+          onPress={handleFeedPress}
+          scale={feedScale}
+          emoji="🍎"
+        />
+
+        <AnimatedButton
+          onPress={handlePlayPress}
+          scale={playScale}
+          emoji="⚽"
+        />
+
+        {isSick && (
+          <AnimatedButton
+            onPress={handleHealPress}
+            scale={healScale}
+            emoji="💊"
+          />
+        )}
+      </View>
+    );
+  }
+);
 
 const styles = StyleSheet.create({
   controls: {
