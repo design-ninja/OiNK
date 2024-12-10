@@ -1,4 +1,4 @@
-export const Typography = {
+export const typography = {
   defaultFontFamily: {
     regular: {
       fontFamily: "PlusJakartaSans-Regular",

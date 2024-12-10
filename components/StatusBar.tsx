@@ -1,4 +1,4 @@
-import { Typography } from "@/constants/Typography";
+import { typography } from "@/config/typography";
 import { useEffect, memo } from "react";
 import { View, Text, StyleSheet } from "react-native";
 import Animated, {
@@ -86,7 +86,7 @@ const styles = StyleSheet.create({
     height: "100%",
   },
   statusValue: {
-    ...Typography.defaultFontFamily.semiBold,
+    ...typography.defaultFontFamily.semiBold,
     fontSize: 16,
     color: "white",
     minWidth: 30,

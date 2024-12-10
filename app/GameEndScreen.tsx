@@ -1,4 +1,4 @@
-import { Typography } from "@/constants/Typography";
+import { typography } from "@/config/typography";
 import { useEffect } from "react";
 import { View, Text, Pressable, StyleSheet } from "react-native";
 import Animated, {
@@ -92,18 +92,18 @@ const styles = StyleSheet.create({
     gap: 16,
   },
   title: {
-    ...Typography.defaultFontFamily.bold,
+    ...typography.defaultFontFamily.bold,
     color: "white",
     fontSize: 48,
   },
   message: {
-    ...Typography.defaultFontFamily.semiBold,
+    ...typography.defaultFontFamily.semiBold,
     color: "white",
     fontSize: 24,
     textAlign: "center",
   },
   resetButton: {
-    ...Typography.defaultFontFamily.semiBold,
+    ...typography.defaultFontFamily.semiBold,
     backgroundColor: "#22c55e",
     paddingHorizontal: 48,
     paddingVertical: 24,
