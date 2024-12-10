@@ -1,5 +1,5 @@
 import { StyleSheet, Pressable } from "react-native";
-import { useCallback } from "react";
+import { useCallback, memo, useMemo } from "react";
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -15,9 +15,11 @@ interface PoopProps {
   onPress: (id: number) => void;
 }
 
-export function Poop({ x, y, id, onPress }: PoopProps) {
+export const Poop = memo(function Poop({ x, y, id, onPress }: PoopProps) {
   const opacity = useSharedValue(1);
   const scale = useSharedValue(1);
+
+  const positionStyle = useMemo(() => ({ left: x, top: y }), [x, y]);
 
   const handlePress = useCallback(() => {
     scale.value = withSequence(
@@ -32,14 +34,17 @@ export function Poop({ x, y, id, onPress }: PoopProps) {
     });
   }, [id, onPress]);
 
-  const animatedStyle = useAnimatedStyle(() => ({
-    opacity: opacity.value,
-    transform: [{ scale: scale.value }],
-  }));
+  const animatedStyle = useAnimatedStyle(
+    () => ({
+      opacity: opacity.value,
+      transform: [{ scale: scale.value }],
+    }),
+    []
+  );
 
   return (
     <Pressable
-      style={[styles.poop, { left: x, top: y }]}
+      style={[styles.poop, positionStyle]}
       onPress={handlePress}
       hitSlop={10}
     >
@@ -48,7 +53,7 @@ export function Poop({ x, y, id, onPress }: PoopProps) {
       </Animated.Text>
     </Pressable>
   );
-}
+});
 
 const styles = StyleSheet.create({
   poop: {
