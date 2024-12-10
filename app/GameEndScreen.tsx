@@ -55,7 +55,7 @@ export function GameEndScreen({
       <Pressable
         style={({ pressed }) => [
           styles.resetButton,
-          { transform: [{ scale: pressed ? 0.95 : 1 }] },
+          { transform: [{ scale: pressed ? 1.1 : 1 }] },
         ]}
         onPress={onReset}
       >
@@ -73,7 +73,7 @@ export function GameEndScreen({
 const styles = StyleSheet.create({
   overlay: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: "black",
+    backgroundColor: "rgba(0, 0, 0, 0.7)",
     justifyContent: "space-between",
     alignItems: "center",
     zIndex: 50,

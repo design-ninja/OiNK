@@ -20,20 +20,6 @@ export default function HomeScreen() {
     setTimeout(() => setCurrentAction(null), 400);
   };
 
-  if (state.isGameOver) {
-    return (
-      <GameEndScreen
-        type="gameOver"
-        causeOfDeath={state.causeOfDeath}
-        onReset={actions.reset}
-      />
-    );
-  }
-
-  if (state.hasWon) {
-    return <GameEndScreen type="win" onReset={actions.reset} />;
-  }
-
   return (
     <View style={styles.container}>
       <View style={styles.backgroundPattern}>
@@ -80,6 +66,14 @@ export default function HomeScreen() {
         onHeal={() => handleAction(actions.heal, "💊")}
         isSick={state.isSick}
       />
+
+      {(state.isGameOver || state.hasWon) && (
+        <GameEndScreen
+          type={state.hasWon ? "win" : "gameOver"}
+          causeOfDeath={state.causeOfDeath}
+          onReset={actions.reset}
+        />
+      )}
     </View>
   );
 }
