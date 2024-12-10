@@ -52,6 +52,7 @@ export default function HomeScreen() {
         controlsHeight={LAYOUT.CONTROLS_HEIGHT}
         safePadding={LAYOUT.PIG_SAFE_PADDING}
         age={state.age}
+        isDead={state.isGameOver}
       />
 
       <ActionEffect
