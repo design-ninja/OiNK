@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useCallback, memo } from "react";
 import { View, StyleSheet, Image, Dimensions } from "react-native";
 import { useGameState, LAYOUT } from "@/hooks/useGameState";
 import { Poop } from "@/components/Poop";
@@ -7,27 +7,50 @@ import { Controls } from "@/components/Controls";
 import { StatusBars } from "@/components/StatusBars";
 import { Pig } from "@/components/Pig";
 import { ActionEffect } from "@/components/ActionEffect";
+
 const SCREEN_WIDTH = Dimensions.get("window").width;
 const SCREEN_HEIGHT = Dimensions.get("window").height;
+
+// Memoize components that don't depend on changing state
+const MemoizedBackground = memo(() => (
+  <View style={styles.backgroundPattern}>
+    <Image
+      source={require("@/assets/images/bg.png")}
+      style={styles.grassBackground}
+    />
+  </View>
+));
+
+const MemoizedPoop = memo(Poop);
 
 export default function HomeScreen() {
   const { state, actions } = useGameState();
   const [currentAction, setCurrentAction] = useState<string | null>(null);
 
-  const handleAction = (action: () => void, emoji: string) => {
+  // Memoize action handler
+  const handleAction = useCallback((action: () => void, emoji: string) => {
     action();
     setCurrentAction(emoji);
     setTimeout(() => setCurrentAction(null), 400);
-  };
+  }, []);
+
+  // Memoize handlers for Controls
+  const handleFeed = useCallback(
+    () => handleAction(actions.feed, "🍎"),
+    [actions.feed, handleAction]
+  );
+  const handlePlay = useCallback(
+    () => handleAction(actions.play, "⚽"),
+    [actions.play, handleAction]
+  );
+  const handleHeal = useCallback(
+    () => handleAction(actions.heal, "💊"),
+    [actions.heal, handleAction]
+  );
 
   return (
     <View style={styles.container}>
-      <View style={styles.backgroundPattern}>
-        <Image
-          source={require("@/assets/images/bg.png")}
-          style={styles.grassBackground}
-        />
-      </View>
+      <MemoizedBackground />
 
       <StatusBars
         height={LAYOUT.STATUS_BAR_HEIGHT}
@@ -37,7 +60,7 @@ export default function HomeScreen() {
       />
 
       {state.poops.map((poop) => (
-        <Poop
+        <MemoizedPoop
           key={poop.id}
           x={poop.x}
           y={poop.y}
@@ -62,9 +85,9 @@ export default function HomeScreen() {
 
       <Controls
         height={LAYOUT.CONTROLS_HEIGHT}
-        onFeed={() => handleAction(actions.feed, "🍎")}
-        onPlay={() => handleAction(actions.play, "⚽")}
-        onHeal={() => handleAction(actions.heal, "💊")}
+        onFeed={handleFeed}
+        onPlay={handlePlay}
+        onHeal={handleHeal}
         isSick={state.isSick}
       />
 
@@ -95,14 +118,5 @@ const styles = StyleSheet.create({
     width: "100%",
     height: "100%",
     resizeMode: "cover",
-  },
-  actionEffectContainer: {
-    ...StyleSheet.absoluteFillObject,
-    justifyContent: "center",
-    alignItems: "center",
-    zIndex: 1,
-  },
-  actionEffectText: {
-    fontSize: 100,
   },
 });
