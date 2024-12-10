@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useMemo, useCallback } from "react";
 import { Text, StyleSheet, Dimensions, Pressable } from "react-native";
 import Animated, {
   useAnimatedStyle,
@@ -21,6 +21,19 @@ interface PigProps {
   isDead: boolean;
 }
 
+// Move constants outside component
+const PIG_SIZE = 150;
+const AGE_MILESTONES = [10, 25, 50, 80] as const;
+
+// Memoize pig images mapping
+const PIG_IMAGES = {
+  0: require("../assets/images/piggy0.png"),
+  10: require("../assets/images/piggy10.png"),
+  25: require("../assets/images/piggy25.png"),
+  50: require("../assets/images/piggy50.png"),
+  80: require("../assets/images/piggy80.png"),
+} as const;
+
 export function Pig({
   isSick,
   statusBarHeight,
@@ -35,28 +48,20 @@ export function Pig({
   const { playSound } = useGameSounds();
   const previousAge = useRef(age);
 
-  useEffect(() => {
-    if (!isDead) {
-      const moveInterval = setInterval(movePig, 2500);
-      return () => clearInterval(moveInterval);
-    }
-  }, [isDead]);
+  // Memoize movement boundaries
+  const boundaries = useMemo(
+    () => ({
+      minX: safePadding,
+      maxX: SCREEN_WIDTH - safePadding - PIG_SIZE,
+      minY: statusBarHeight + safePadding,
+      maxY: SCREEN_HEIGHT - controlsHeight - safePadding - PIG_SIZE,
+    }),
+    [statusBarHeight, controlsHeight, safePadding]
+  );
 
-  const handlePress = () => {
-    playSound("play");
-    scale.value = withSequence(
-      withTiming(1.2, { duration: 100 }),
-      withTiming(1, { duration: 100 })
-    );
-  };
-
-  const movePig = () => {
-    const PIG_SIZE = 150;
-
-    const minX = safePadding;
-    const maxX = SCREEN_WIDTH - safePadding - PIG_SIZE;
-    const minY = statusBarHeight + safePadding;
-    const maxY = SCREEN_HEIGHT - controlsHeight - safePadding - PIG_SIZE;
+  // Memoize movement handler
+  const movePig = useCallback(() => {
+    const { minX, maxX, minY, maxY } = boundaries;
 
     const newX = Math.min(
       maxX,
@@ -69,15 +74,28 @@ export function Pig({
 
     positionX.value = withSpring(newX, { damping: 10, stiffness: 100 });
     positionY.value = withSpring(newY, { damping: 10, stiffness: 100 });
-  };
+  }, [boundaries, positionX, positionY]);
 
+  // Optimize movement interval
   useEffect(() => {
-    console.log("Current pig age:", age);
-  }, [age]);
+    if (isDead) return;
 
+    const moveInterval = setInterval(movePig, 2500);
+    return () => clearInterval(moveInterval);
+  }, [isDead, movePig]);
+
+  // Memoize press handler
+  const handlePress = useCallback(() => {
+    playSound("play");
+    scale.value = withSequence(
+      withTiming(1.2, { duration: 100 }),
+      withTiming(1, { duration: 100 })
+    );
+  }, [playSound, scale]);
+
+  // Optimize age milestone effect
   useEffect(() => {
-    const milestones = [10, 25, 50, 80];
-    const hasReachedMilestone = milestones.some(
+    const hasReachedMilestone = AGE_MILESTONES.some(
       (milestone) => age >= milestone && previousAge.current < milestone
     );
 
@@ -90,26 +108,31 @@ export function Pig({
     }
 
     previousAge.current = age;
-  }, [age, playSound]);
+  }, [age, playSound, scale]);
 
-  const getPigImage = () => {
+  // Memoize pig image getter
+  const getPigImage = useCallback(() => {
     if (isDead) return "🪦";
-    if (age >= 80) return require("../assets/images/piggy80.png");
-    if (age >= 50) return require("../assets/images/piggy50.png");
-    if (age >= 25) return require("../assets/images/piggy25.png");
-    if (age >= 10) return require("../assets/images/piggy10.png");
-    return require("../assets/images/piggy0.png");
-  };
 
-  const animatedStyle = useAnimatedStyle(() => {
-    return {
+    const milestone = [...AGE_MILESTONES].reverse().find((m) => age >= m) ?? 0;
+    return PIG_IMAGES[milestone as keyof typeof PIG_IMAGES];
+  }, [age, isDead]);
+
+  // Memoize animated style
+  const animatedStyle = useAnimatedStyle(
+    () => ({
       transform: [
         { translateX: positionX.value },
         { translateY: positionY.value },
         { scale: scale.value },
       ],
-    };
-  });
+    }),
+    []
+  );
+
+  useEffect(() => {
+    console.log("🐷 Current age:", age);
+  }, [age]);
 
   return (
     <Animated.View style={[styles.pig, animatedStyle]}>
