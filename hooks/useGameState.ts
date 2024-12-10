@@ -13,7 +13,7 @@ export const LAYOUT = {
 } as const;
 
 const GAME_CONFIG = {
-  TICK_RATE: 3000,
+  TICK_RATE: 1000,
   POOP_CHANCE: 0.12,
   SICK_CHANCE: 0.08,
   MAX_STAT_VALUE: 100,
@@ -212,7 +212,7 @@ export function useGameState() {
         decreaseStats();
 
         setState((prev) => {
-          const newAge = prev.age + 0.1;
+          const newAge = prev.age + 0.25;
           if (newAge >= 100) {
             return { ...prev, age: 100, hasWon: true };
           }
@@ -281,14 +281,6 @@ export function useGameState() {
       playSound("win");
     }
   }, [state.isGameOver, state.hasWon, playSound]);
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setState((prev) => ({ ...prev, age: prev.age + 1 }));
-    }, 1000);
-
-    return () => clearInterval(interval);
-  }, []);
 
   useEffect(() => {
     const loadSound = async () => {
