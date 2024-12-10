@@ -7,18 +7,24 @@ import Animated, {
   withSpring,
 } from "react-native-reanimated";
 
-const DEATH_MESSAGES = {
+const END_MESSAGES = {
   hunger: { emoji: "🍽️", message: "🐷 died from hunger..." },
   happiness: { emoji: "😢", message: "🐷 died from sadness..." },
-  cleanliness: { emoji: "🦠", message: "🐷 died from uncleanliness..." },
+  cleanliness: { emoji: "🦠", message: "🐷 died from disease..." },
+  win: { emoji: "🎉", message: "You raised a happy pig!" },
 } as const;
 
-interface GameOverScreenProps {
+interface GameEndScreenProps {
+  type: "win" | "gameOver";
   causeOfDeath?: string;
   onReset: () => void;
 }
 
-export function GameOverScreen({ causeOfDeath, onReset }: GameOverScreenProps) {
+export function GameEndScreen({
+  type,
+  causeOfDeath,
+  onReset,
+}: GameEndScreenProps) {
   const scale = useSharedValue(0);
 
   useEffect(() => {
@@ -29,18 +35,23 @@ export function GameOverScreen({ causeOfDeath, onReset }: GameOverScreenProps) {
     transform: [{ scale: scale.value }],
   }));
 
-  const deathInfo =
-    causeOfDeath && causeOfDeath in DEATH_MESSAGES
-      ? DEATH_MESSAGES[causeOfDeath as keyof typeof DEATH_MESSAGES]
+  const endInfo =
+    type === "win"
+      ? END_MESSAGES.win
+      : causeOfDeath && causeOfDeath in END_MESSAGES
+      ? END_MESSAGES[causeOfDeath as keyof typeof END_MESSAGES]
       : { emoji: "💀", message: "Game Over" };
 
   return (
     <View style={styles.overlay}>
-      <Animated.Text style={[styles.gameOverEmoji, animatedStyle]}>
-        {deathInfo.emoji}
-      </Animated.Text>
-      <Text style={styles.gameOverTitle}>Game Over</Text>
-      <Text style={styles.gameOverMessage}>{deathInfo.message}</Text>
+      <View style={styles.content}>
+        <Animated.Text style={[styles.emoji, animatedStyle]}>
+          {endInfo.emoji}
+        </Animated.Text>
+        <Text style={styles.title}>
+          {type === "win" ? "You Win!" : "Game Over"}
+        </Text>
+      </View>
       <Pressable
         style={({ pressed }) => [
           styles.resetButton,
@@ -48,8 +59,13 @@ export function GameOverScreen({ causeOfDeath, onReset }: GameOverScreenProps) {
         ]}
         onPress={onReset}
       >
-        <Text style={styles.resetButtonText}>Start Again</Text>
+        <Text style={styles.resetButtonText}>
+          {type === "win" ? "Play Again" : "Start Again"}
+        </Text>
       </Pressable>
+      {type === "gameOver" && (
+        <Text style={styles.message}>{endInfo.message}</Text>
+      )}
     </View>
   );
 }
@@ -58,36 +74,42 @@ const styles = StyleSheet.create({
   overlay: {
     ...StyleSheet.absoluteFillObject,
     backgroundColor: "black",
-    justifyContent: "center",
+    justifyContent: "space-between",
     alignItems: "center",
     zIndex: 50,
+    display: "flex",
+    flexDirection: "column",
+    gap: 40,
+    padding: 64,
   },
-  gameOverEmoji: {
+  emoji: {
     fontSize: 100,
-    position: "absolute",
   },
-  gameOverTitle: {
+  content: {
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "center",
+    gap: 16,
+  },
+  title: {
     ...Typography.defaultFontFamily.bold,
     color: "white",
     fontSize: 48,
-    marginTop: 120,
   },
-  gameOverMessage: {
+  message: {
     ...Typography.defaultFontFamily.semiBold,
     color: "white",
     fontSize: 24,
-    marginTop: 16,
+    textAlign: "center",
   },
   resetButton: {
+    ...Typography.defaultFontFamily.semiBold,
     backgroundColor: "#22c55e",
     paddingHorizontal: 48,
     paddingVertical: 24,
-    borderRadius: 9999,
-    marginTop: "auto",
-    marginBottom: 64,
+    borderRadius: 40,
   },
   resetButtonText: {
-    ...Typography.defaultFontFamily.semiBold,
     color: "white",
     fontSize: 20,
     fontWeight: "600",

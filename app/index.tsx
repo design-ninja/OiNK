@@ -2,8 +2,7 @@ import { useState } from "react";
 import { View, StyleSheet, Image, Dimensions } from "react-native";
 import { useGameState, LAYOUT } from "@/hooks/useGameState";
 import { Poop } from "@/components/Poop";
-import { GameOverScreen } from "@/app/screens/GameOverScreen";
-import { YouWinScreen } from "@/app/screens/YouWinScreen";
+import { GameEndScreen } from "./GameEndScreen";
 import { Controls } from "@/components/Controls";
 import { StatusBars } from "@/components/StatusBars";
 import { Pig } from "@/components/Pig";
@@ -23,7 +22,8 @@ export default function HomeScreen() {
 
   if (state.isGameOver) {
     return (
-      <GameOverScreen
+      <GameEndScreen
+        type="gameOver"
         causeOfDeath={state.causeOfDeath}
         onReset={actions.reset}
       />
@@ -31,7 +31,7 @@ export default function HomeScreen() {
   }
 
   if (state.hasWon) {
-    return <YouWinScreen onReset={actions.reset} />;
+    return <GameEndScreen type="win" onReset={actions.reset} />;
   }
 
   return (
