@@ -20,41 +20,6 @@ interface StatusBarProps {
   color: string;
 }
 
-const styles = StyleSheet.create({
-  statusBarContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-  },
-  statusEmoji: {
-    fontSize: 24,
-    textShadowColor: "rgba(0, 0, 0, 0.3)",
-    textShadowOffset: { width: 1, height: 1 },
-    textShadowRadius: 3,
-  },
-  statusBarTrack: {
-    flex: 1,
-    height: 12,
-    backgroundColor: "rgba(0, 0, 0, 0.15)",
-    shadowColor: "rgba(0, 0, 0, 0.6)",
-    borderRadius: 6,
-    overflow: "hidden",
-  },
-  statusBarFill: {
-    height: "100%",
-  },
-  statusValue: {
-    ...Typography.defaultFontFamily.semiBold,
-    fontSize: 16,
-    color: "white",
-    textShadowColor: "rgba(0, 0, 0, 0.3)",
-    textShadowOffset: { width: 1, height: 1 },
-    textShadowRadius: 3,
-    minWidth: 30,
-    textAlign: "right",
-  },
-});
-
 export const StatusBar = memo(function StatusBar({
   label,
   value,
@@ -99,4 +64,32 @@ export const StatusBar = memo(function StatusBar({
       <Text style={styles.statusValue}>{displayValue}</Text>
     </View>
   );
+});
+
+const styles = StyleSheet.create({
+  statusBarContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+  },
+  statusEmoji: {
+    fontSize: 24,
+  },
+  statusBarTrack: {
+    flex: 1,
+    height: 12,
+    backgroundColor: "rgba(0, 0, 0, 0.15)",
+    borderRadius: 6,
+    overflow: "hidden",
+  },
+  statusBarFill: {
+    height: "100%",
+  },
+  statusValue: {
+    ...Typography.defaultFontFamily.semiBold,
+    fontSize: 16,
+    color: "white",
+    minWidth: 30,
+    textAlign: "right",
+  },
 });

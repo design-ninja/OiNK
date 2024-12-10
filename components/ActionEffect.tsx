@@ -52,7 +52,7 @@ export const ActionEffect = memo(function ActionEffect({
   if (!isVisible) return null;
 
   return (
-    <View style={styles.container} pointerEvents="none">
+    <View style={styles.container}>
       <Animated.Text style={[styles.text, animatedStyle]}>
         {emoji}
       </Animated.Text>
@@ -66,6 +66,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     zIndex: 1,
+    pointerEvents: "none",
   },
   text: {
     fontSize: 100,

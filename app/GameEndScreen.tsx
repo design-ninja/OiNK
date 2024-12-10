@@ -20,7 +20,7 @@ interface GameEndScreenProps {
   onReset: () => void;
 }
 
-export function GameEndScreen({
+export default function GameEndScreen({
   type,
   causeOfDeath,
   onReset,

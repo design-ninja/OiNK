@@ -141,7 +141,11 @@ export function Pig({
           <Text style={styles.tombstone}>{getPigImage()}</Text>
         ) : (
           <>
-            <Animated.Image source={getPigImage()} style={styles.pigImage} />
+            <Animated.Image
+              source={getPigImage()}
+              style={styles.pigImage}
+              resizeMode="contain"
+            />
             {isSick && <Text style={styles.sickEmoji}>🤮</Text>}
           </>
         )}
@@ -157,7 +161,6 @@ const styles = StyleSheet.create({
   pigImage: {
     width: 150,
     height: 150,
-    resizeMode: "contain",
   },
   sickEmoji: {
     fontSize: 64,

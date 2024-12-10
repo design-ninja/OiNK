@@ -2,7 +2,7 @@ import { useState, useCallback, memo } from "react";
 import { View, StyleSheet, Image, Dimensions } from "react-native";
 import { useGameState, LAYOUT } from "@/hooks/useGameState";
 import { Poop } from "@/components/Poop";
-import { GameEndScreen } from "./GameEndScreen";
+import GameEndScreen from "./GameEndScreen";
 import { Controls } from "@/components/Controls";
 import { StatusBars } from "@/components/StatusBars";
 import { Pig } from "@/components/Pig";
@@ -17,6 +17,7 @@ const MemoizedBackground = memo(() => (
     <Image
       source={require("@/assets/images/bg.png")}
       style={styles.grassBackground}
+      resizeMode="cover"
     />
   </View>
 ));
@@ -112,11 +113,9 @@ const styles = StyleSheet.create({
     position: "absolute",
     width: SCREEN_WIDTH,
     height: SCREEN_HEIGHT,
-    backgroundColor: "#90BE6D",
   },
   grassBackground: {
     width: "100%",
     height: "100%",
-    resizeMode: "cover",
   },
 });
