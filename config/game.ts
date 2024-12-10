@@ -1,0 +1,22 @@
+export const LAYOUT = {
+  STATUS_BAR_HEIGHT: 200,
+  CONTROLS_HEIGHT: 120,
+  PIG_SAFE_PADDING: 50,
+} as const;
+
+export const GAME_CONFIG = {
+  TICK_RATE: 1000,
+  POOP_CHANCE: 0.12,
+  SICK_CHANCE: 0.03,
+  MAX_STAT_VALUE: 100,
+  MIN_STAT_VALUE: 0,
+  STAT_DECREASE: {
+    NORMAL: 0.8,
+    SICK: 1.5,
+    CLEANLINESS: 1.2,
+  },
+  STAT_INCREASE: {
+    NORMAL: 20,
+    SICK: 8,
+  },
+} as const;

@@ -1,6 +1,7 @@
 import { useState, useCallback, memo } from "react";
 import { View, StyleSheet, Image, Dimensions } from "react-native";
-import { useGameState, LAYOUT } from "@/hooks/useGameState";
+import { useGameState } from "@/hooks/useGameState";
+import { LAYOUT } from "@/config/game";
 import { Poop } from "@/components/Poop";
 import GameEndScreen from "./GameEndScreen";
 import { Controls } from "@/components/Controls";
