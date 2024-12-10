@@ -15,7 +15,7 @@ export const LAYOUT = {
 const GAME_CONFIG = {
   TICK_RATE: 1000,
   POOP_CHANCE: 0.12,
-  SICK_CHANCE: 0.08,
+  SICK_CHANCE: 0.05,
   MAX_STAT_VALUE: 100,
   MIN_STAT_VALUE: 0,
   STAT_DECREASE: {
@@ -222,14 +222,14 @@ export function useGameState() {
         // Modified sick chance
         setState((prev) => {
           let sickChance = GAME_CONFIG.SICK_CHANCE;
-          sickChance += prev.poops.length * 0.05;
+          sickChance += prev.poops.length * 0.02;
 
           if (prev.happiness < 50) {
-            sickChance += (50 - prev.happiness) * 0.005;
+            sickChance += (50 - prev.happiness) * 0.002;
           }
 
           if (prev.hunger < 30) {
-            sickChance += (30 - prev.hunger) * 0.01;
+            sickChance += (30 - prev.hunger) * 0.005;
           }
 
           if (!prev.isSick && Math.random() < sickChance) {
