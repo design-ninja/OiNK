@@ -58,12 +58,12 @@ export const Poop = memo(function Poop({ x, y, id, onPress }: PoopProps) {
 const styles = StyleSheet.create({
   poop: {
     position: "absolute",
-    width: 60,
-    height: 60,
+    width: 64,
+    height: 64,
     justifyContent: "center",
     alignItems: "center",
   },
   poopEmoji: {
-    fontSize: 56,
+    fontSize: 64,
   },
 });

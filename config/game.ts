@@ -1,9 +1,3 @@
-export const LAYOUT = {
-  STATUS_BAR_HEIGHT: 200,
-  CONTROLS_HEIGHT: 120,
-  PIG_SAFE_PADDING: 50,
-} as const;
-
 export const GAME_CONFIG = {
   TICK_RATE: 1000,
   POOP_CHANCE: 0.12,
@@ -23,13 +17,19 @@ export const GAME_CONFIG = {
   AGE_MILESTONES: [10, 25, 50, 80] as const,
 } as const;
 
+export const LAYOUT = {
+  STATUS_BAR_HEIGHT: 200,
+  CONTROLS_HEIGHT: 120,
+  PIG_SAFE_PADDING: 50,
+} as const;
+
 export const GAME_ASSETS = {
   PIG_IMAGES: {
-    0: require("../assets/images/piggy0.png"),
-    10: require("../assets/images/piggy10.png"),
-    25: require("../assets/images/piggy25.png"),
-    50: require("../assets/images/piggy50.png"),
-    80: require("../assets/images/piggy80.png"),
+    0: require("@/assets/images/piggy0.png"),
+    10: require("@/assets/images/piggy10.png"),
+    25: require("@/assets/images/piggy25.png"),
+    50: require("@/assets/images/piggy50.png"),
+    80: require("@/assets/images/piggy80.png"),
   },
   PIG_EMOJIS: {
     DEAD: "🪦",
