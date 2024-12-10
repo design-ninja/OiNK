@@ -111,7 +111,7 @@ const styles = StyleSheet.create({
   },
   resetButtonText: {
     color: "white",
-    fontSize: 20,
-    fontWeight: "600",
+    fontSize: 24,
+    fontWeight: "500",
   },
 });
