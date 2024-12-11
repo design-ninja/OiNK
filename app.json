@@ -16,7 +16,7 @@
     "assetBundlePatterns": ["**/*"],
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.lirik.oink",
+      "bundleIdentifier": "com.lirik.OiNK",
       "buildNumber": "1.0.0",
       "infoPlist": {
         "UIBackgroundModes": ["audio"]
@@ -27,7 +27,7 @@
         "foregroundImage": "./assets/images/icon.png",
         "backgroundColor": "#FF649B"
       },
-      "package": "com.lirik.oink",
+      "package": "com.lirik.OiNK",
       "versionCode": 1,
       "permissions": [
         "android.permission.RECORD_AUDIO",

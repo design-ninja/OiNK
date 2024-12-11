@@ -100,7 +100,7 @@ export const Controls = memo(
 const styles = StyleSheet.create({
   controls: {
     position: "absolute",
-    bottom: 24,
+    bottom: 16,
     left: 24,
     right: 24,
     display: "flex",

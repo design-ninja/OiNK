@@ -28,7 +28,7 @@
         <key>CFBundleURLSchemes</key>
         <array>
           <string>oink</string>
-          <string>com.lirik.oink</string>
+          <string>com.lirik.OiNK</string>
         </array>
       </dict>
       <dict>
