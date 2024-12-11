@@ -1,5 +1,5 @@
 import { useEffect, useRef, useCallback } from "react";
-import { Audio } from "expo-av";
+import { Audio, InterruptionModeIOS, InterruptionModeAndroid } from "expo-av";
 
 export function useGameSounds() {
   const sounds = useRef<Record<string, Audio.Sound>>({});
@@ -20,9 +20,13 @@ export function useGameSounds() {
     const loadSounds = async () => {
       try {
         await Audio.setAudioModeAsync({
-          playsInSilentModeIOS: true,
-          staysActiveInBackground: true,
-          shouldDuckAndroid: true,
+          playsInSilentModeIOS: false,
+          staysActiveInBackground: false,
+          interruptionModeIOS: InterruptionModeIOS.DoNotMix,
+          interruptionModeAndroid: InterruptionModeAndroid.DoNotMix,
+          shouldDuckAndroid: false,
+          playThroughEarpieceAndroid: false,
+          allowsRecordingIOS: false,
         });
 
         const soundFiles = {
@@ -40,7 +44,10 @@ export function useGameSounds() {
         for (const [key, file] of Object.entries(soundFiles)) {
           const { sound } = await Audio.Sound.createAsync(file, {
             shouldPlay: false,
-            volume: 1,
+            volume: 1.0,
+            rate: 1.0,
+            shouldCorrectPitch: true,
+            progressUpdateIntervalMillis: 1000,
           });
           sounds.current[key] = sound;
         }

@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
-import { Dimensions } from "react-native";
+import { Dimensions, AppState } from "react-native";
 import { useGameSounds } from "./useGameSounds";
 import { Audio } from "expo-av";
 import { LAYOUT, GAME_CONFIG } from "@/config/game";
@@ -261,6 +261,14 @@ export function useGameState() {
   }, [state.isGameOver, state.hasWon, playSound]);
 
   useEffect(() => {
+    const subscription = AppState.addEventListener("change", (nextAppState) => {
+      if (nextAppState === "background" && state.backgroundSound) {
+        state.backgroundSound.pauseAsync();
+      } else if (nextAppState === "active" && state.backgroundSound) {
+        state.backgroundSound.playAsync();
+      }
+    });
+
     const loadSound = async () => {
       const { sound } = await Audio.Sound.createAsync(
         require("../assets/sounds/background.mp3"),
@@ -273,6 +281,7 @@ export function useGameState() {
     loadSound();
 
     return () => {
+      subscription.remove();
       if (state.backgroundSound) {
         state.backgroundSound.unloadAsync();
       }
