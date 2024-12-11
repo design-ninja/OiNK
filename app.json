@@ -16,7 +16,7 @@
     "assetBundlePatterns": ["**/*"],
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.yourcompany.oink",
+      "bundleIdentifier": "com.lirik.oink",
       "buildNumber": "1.0.0",
       "infoPlist": {
         "UIBackgroundModes": ["audio"]
@@ -27,9 +27,19 @@
         "foregroundImage": "./assets/images/icon.png",
         "backgroundColor": "#FF649B"
       },
-      "package": "com.yourcompany.oink",
-      "versionCode": 1
+      "package": "com.lirik.oink",
+      "versionCode": 1,
+      "permissions": [
+        "android.permission.RECORD_AUDIO",
+        "android.permission.MODIFY_AUDIO_SETTINGS"
+      ]
     },
-    "plugins": ["expo-av"]
+    "plugins": ["expo-av"],
+    "extra": {
+      "eas": {
+        "projectId": "e318bd79-042b-46a1-b006-7c1bd61dcd85"
+      }
+    },
+    "owner": "limebridge"
   }
 }
