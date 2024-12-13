@@ -190,7 +190,7 @@ export function useGameState() {
         decreaseStats();
 
         setState((prev) => {
-          const newAge = prev.age + 2.25;
+          const newAge = prev.age + 0.25;
           if (newAge >= 100) {
             return { ...prev, age: 100, hasWon: true };
           }
